@@ -9,6 +9,9 @@ ZFS Commander is a simple front-end for the most commonly used zpool & zfs comma
 
 ## Installation 
 
+ZFS commander is build on Rust language, so make sure to have Rust installed on your machine.
+Instructions can be found here: https://www.rust-lang.org/tools/install 
+
 To compile and install ZFS comamnder, run the following commands:
 
     $ make
