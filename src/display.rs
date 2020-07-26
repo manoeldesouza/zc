@@ -208,7 +208,7 @@ impl Screen {
             ContentType::Pools =>     { command::zpool_scrub(selected_elements) },
             ContentType::Datasets =>  { },
             ContentType::Volumes =>   { },
-            ContentType::Snapshots => { },
+            ContentType::Snapshots => { command::zfs_rollback(selected_elements) },
         };
     }
 
@@ -327,7 +327,7 @@ impl Screen {
         let pools_menu     = format!("P 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Remov 9 _____ 10 Exit ");
         let datasets_menu  = format!("D 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
         let volumes_menu   = format!("V 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
-        let snapshots_menu = format!("S 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
+        let snapshots_menu = format!("S 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 RollB 8 Remov 9 _____ 10 Exit ");
 
         let mut selected_menu: String;
 

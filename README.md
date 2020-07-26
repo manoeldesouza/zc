@@ -47,7 +47,7 @@ Use TAB key to switch between the modes available. Use LEFT or RIGHT keys to nav
 |**F4** |         -       |        -      |        -      |        -      |
 |**F5** |         -       |        -      |        -      |        -      |
 |**F6** |         -       |        -      |        -      |        -      |
-|**F7** |  *zpool scrub*  |        -      |        -      |        -      |
+|**F7** |  *zpool scrub*  |        -      | *zfs rollback*|        -      |
 |**F8** | *zpool destroy* | *zfs destroy* | *zfs destroy* | *zfs destroy* |
 |**F9** |         -       |        -      |        -      |        -      |
 |**F10**|       Exit      |      Exit     |      Exit     |      Exit     |

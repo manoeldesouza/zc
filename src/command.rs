@@ -50,6 +50,15 @@ pub fn run_command(cmd: &str, arguments: &Vec<&str>) {
     let _output = command.args(arguments).output().expect("Failure running command: run_command");
 }
 
+pub fn is_zfs_installed() -> bool {
+
+    let mut command = process::Command::new("which");
+    let temp_output = command.arg("zfs").output().expect("Failure running command: is_zfs_installed");
+    let output = String::from_utf8_lossy(&temp_output.stdout);
+    
+    output.contains("zfs")
+}
+
 
 pub fn zfs_pools() -> Vec<CommandResult> {
     
@@ -85,6 +94,17 @@ pub fn zfs_destroy(selected_elements: Vec<String>) {
     });
 }
 
+pub fn zfs_rollback(selected_elements: Vec<String>) {
+
+    thread::spawn(|| { 
+
+        for element in selected_elements {
+            let arguments = vec!["rollback", "-rf", element.as_str()];
+
+            run_command("zfs", &arguments);
+        }
+    });
+}
 
 pub fn zpool_destroy(selected_elements: Vec<String>) {
 

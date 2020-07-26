@@ -4,7 +4,12 @@ mod command;
 
 fn main() {
 
-    let mut screen = display::Screen::new();
-    screen.run()
 
+    if command::is_zfs_installed() {
+        let mut screen = display::Screen::new();
+        screen.run()
+
+    } else {
+        println!("ZFS is not installed")
+    };
 }
