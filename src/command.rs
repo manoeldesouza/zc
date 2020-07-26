@@ -9,36 +9,6 @@ pub struct CommandResult {
 }
 
 
-pub fn zfs_pools() -> Vec<CommandResult> {
-    
-    vec![
-        CommandResult {
-            name: "Carolina Wildner Simm".to_string(),
-            used: "36".to_string()
-        }
-    ]
-}
-
-pub fn zfs_dataset() -> Vec<CommandResult> {
-    let arguments = vec!["list", "-o", "name,used", "-H"];
-    list_command("zfs", &arguments)
-}
-
-pub fn zfs_volumes() -> Vec<CommandResult> {
-    
-    vec![
-        CommandResult {
-            name: "Manoel de Souza e Silva Neto".to_string(),
-            used: "40".to_string()
-        }
-    ]
-}
-
-pub fn zfs_snapshots() -> Vec<CommandResult> {
-    let arguments = vec!["list", "-H", "-o", "name,used", "-t", "snapshot"];
-    list_command("zfs", &arguments)
-}
-
 pub fn list_command(cmd: &str, arguments: &Vec<&str>) -> Vec<CommandResult> {
 
     let mut command = process::Command::new(cmd);
@@ -80,6 +50,29 @@ pub fn run_command(cmd: &str, arguments: &Vec<&str>) {
     let _output = command.args(arguments).output().expect("Failure running command: run_command");
 }
 
+
+pub fn zfs_pools() -> Vec<CommandResult> {
+    
+    let arguments = vec!["list", "-o", "name,size", "-H"];
+    list_command("zpool", &arguments)
+}
+
+pub fn zfs_dataset() -> Vec<CommandResult> {
+    let arguments = vec!["list", "-o", "name,used", "-H"];
+    list_command("zfs", &arguments)
+}
+
+pub fn zfs_volumes() -> Vec<CommandResult> {
+    
+    let arguments = vec!["list", "-H", "-o", "name,used", "-t", "volume"];
+    list_command("zfs", &arguments)
+}
+
+pub fn zfs_snapshots() -> Vec<CommandResult> {
+    let arguments = vec!["list", "-H", "-o", "name,used", "-t", "snapshot"];
+    list_command("zfs", &arguments)
+}
+
 pub fn zfs_destroy(selected_elements: Vec<String>) {
 
     thread::spawn(|| { 
@@ -88,6 +81,31 @@ pub fn zfs_destroy(selected_elements: Vec<String>) {
             let arguments = vec!["destroy", element.as_str()];
 
             run_command("zfs", &arguments);
+        }
+    });
+}
+
+
+pub fn zpool_destroy(selected_elements: Vec<String>) {
+
+    thread::spawn(|| { 
+
+        for element in selected_elements {
+            let arguments = vec!["destroy", element.as_str()];
+
+            run_command("zpool", &arguments);
+        }
+    });
+}
+
+pub fn zpool_scrub(selected_elements: Vec<String>) {
+
+    thread::spawn(|| { 
+
+        for element in selected_elements {
+            let arguments = vec!["scrub", element.as_str()];
+
+            run_command("zpool", &arguments);
         }
     });
 }

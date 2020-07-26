@@ -3,6 +3,9 @@
 all:
 	cargo build --release
 
+run:
+	target/release/zc
+
 install:
 	cp target/release/zc /usr/bin
 

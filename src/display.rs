@@ -36,23 +36,9 @@ impl Screen {
         
         getmaxyx(stdscr(), &mut max_y, &mut max_x);
 
-        let left_content = Content {
-            is_selected: true,
-            start_from: 0,
-            position: 0,
-            c_type: ContentType::Datasets,
-            command_result: Vec::new(),
-            selected_elements: Vec::new(),
-        };
-
-        let right_content = Content {
-            is_selected: false,
-            start_from: 0,
-            position: 0,
-            c_type: ContentType::Snapshots,
-            command_result: Vec::new(),
-            selected_elements: Vec::new(),
-        };
+        // let left_content = Content::new(ContentType::Datasets);
+        let left_content = Content::new(ContentType::Pools);
+        let right_content = Content::new(ContentType::Snapshots);
 
         Screen {
             max_y: 0,
@@ -83,17 +69,17 @@ impl Screen {
         let key = wgetch(stdscr());
 
         match key {
-            KEY_F1    => {},
-            KEY_F2    => {},
-            KEY_F3    => {},
-            KEY_F4    => {},
-            KEY_F5    => {},
-            KEY_F6    => {},
-            KEY_F7    => {},
+            KEY_F1    => { self.key_f1(); },
+            KEY_F2    => { self.key_f2(); },
+            KEY_F3    => { self.key_f3(); },
+            KEY_F4    => { self.key_f4(); },
+            KEY_F5    => { self.key_f5(); },
+            KEY_F6    => { self.key_f6(); },
+            KEY_F7    => { self.key_f7(); },
             KEY_F8    => { self.key_f8(); },
-            KEY_F9    => {},
+            KEY_F9    => { self.key_f9(); },
             KEY_F10   => { return Err(()); },
-            KEY_F11   => {},
+            KEY_F11   => { self.key_f11(); },
             KEY_F12   => { self.test_windows(); },
 
             KEY_DL    => {},
@@ -111,31 +97,12 @@ impl Screen {
             KEY_RIGHT => { self.switch_window(); },
 
             KEY_IL    => {},
-            KEY_TAB   => { self.switch_window(); },
+            KEY_TAB   => { self.switch_mode(); },
 
             _ => {},
         }
 
         Ok(())
-    }
-
-    fn test_windows(&self) {
-
-        let s = format!("  Left position: {} len: {}  ", self.left_content.position, self.left_content.command_result.len());
-        mvwprintw(stdscr(), 1, 1, s.as_str());
-        let s = format!(" Right position: {} len: {}  ", self.right_content.position, self.right_content.command_result.len());
-        mvwprintw(stdscr(), 2, 1, s.as_str());
-        getch();
-    }
-
-    fn switch_window(&mut self) {
-        if self.left_content.is_selected {
-            self.left_content.is_selected = false;
-            self.right_content.is_selected = true;
-        } else {
-            self.left_content.is_selected = true;
-            self.right_content.is_selected = false;
-        }
     }
 
     fn key_home(&mut self) {
@@ -209,6 +176,84 @@ impl Screen {
         }
     }
 
+    fn key_f1(&self) { 
+        // TODO
+    }
+
+    fn key_f2(&self) { 
+        // TODO
+    }
+
+    fn key_f3(&self) { 
+        // TODO
+    }
+
+    fn key_f4(&self) { 
+        // TODO
+    }
+
+    fn key_f5(&self) { 
+        // TODO
+    }
+
+    fn key_f6(&self) { 
+        // TODO
+    }
+
+    fn key_f7(&self) {
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     { command::zpool_scrub(selected_elements) },
+            ContentType::Datasets =>  { },
+            ContentType::Volumes =>   { },
+            ContentType::Snapshots => { },
+        };
+    }
+
+    fn key_f8(&self) {
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     { command::zpool_destroy(selected_elements) },
+            ContentType::Datasets =>  { command::zfs_destroy(selected_elements) },
+            ContentType::Volumes =>   { command::zfs_destroy(selected_elements) },
+            ContentType::Snapshots => { command::zfs_destroy(selected_elements) },
+        };
+    }
+
+    fn key_f9(&self) { 
+        // TODO
+    }
+
+    fn key_f11(&self) { 
+        // TODO
+    }
+
+
+    fn switch_window(&mut self) {
+
+        if self.left_content.is_selected {
+            self.left_content.is_selected = false;
+            self.right_content.is_selected = true;
+        } else {
+            self.left_content.is_selected = true;
+            self.right_content.is_selected = false;
+        }
+    }
+
+    fn switch_mode(&mut self) {
+
+        if self.left_content.is_selected {
+            self.left_content = Content::new(self.left_content.next());
+
+        } else {
+            self.right_content = Content::new(self.right_content.next());
+        }
+    }
+
     fn scroll_window(content: &mut Content, height: i32) {
 
         if content.position < content.start_from {
@@ -219,35 +264,15 @@ impl Screen {
         }
     }
 
-    fn key_f8(&self) {
+    fn test_windows(&self) {
 
-        let selected_elements = self.selected_elements();
-
-        match self.content_type() {
-            ContentType::Pools =>     {  },
-            ContentType::Datasets =>  { command::zfs_destroy(selected_elements) },
-            ContentType::Volumes =>   {  },
-            ContentType::Snapshots => { command::zfs_destroy(selected_elements) },
-        };
+        let s = format!("  Left position: {} len: {}  ", self.left_content.position, self.left_content.command_result.len());
+        mvwprintw(stdscr(), 1, 1, s.as_str());
+        let s = format!(" Right position: {} len: {}  ", self.right_content.position, self.right_content.command_result.len());
+        mvwprintw(stdscr(), 2, 1, s.as_str());
+        getch();
     }
 
-    fn selected_elements(&self) -> Vec<String> {
-
-        if self.left_content.is_selected {
-            if self.left_content.selected_elements.len() > 0 {
-                self.left_content.selected_elements.to_owned()
-            } else {
-                vec![self.left_content.command_result[self.left_content.position].name.to_owned()]
-            }
-
-        } else {
-            if self.right_content.selected_elements.len() > 0 {
-                self.right_content.selected_elements.to_owned()
-            } else {
-                vec![self.right_content.command_result[self.right_content.position].name.to_owned()]
-            }
-        }
-    }
 
     fn draw(&mut self) {
 
@@ -299,10 +324,10 @@ impl Screen {
 
     fn draw_menu(&mut self) {
 
-        let pools_menu     = format!("P: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8_____ 9_____ 10Exit ");
-        let datasets_menu  = format!("D: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8Remov 9_____ 10Exit ");
-        let volumes_menu   = format!("V: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8_____ 9_____ 10Exit ");
-        let snapshots_menu = format!("S: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8Remov 9_____ 10Exit ");
+        let pools_menu     = format!("P 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Remov 9 _____ 10 Exit ");
+        let datasets_menu  = format!("D 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
+        let volumes_menu   = format!("V 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
+        let snapshots_menu = format!("S 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
 
         let mut selected_menu: String;
 
@@ -365,6 +390,24 @@ impl Screen {
 
         format!("{}", name)
     }
+
+    fn selected_elements(&self) -> Vec<String> {
+
+        if self.left_content.is_selected {
+            if self.left_content.selected_elements.len() > 0 {
+                self.left_content.selected_elements.to_owned()
+            } else {
+                vec![self.left_content.command_result[self.left_content.position].name.to_owned()]
+            }
+
+        } else {
+            if self.right_content.selected_elements.len() > 0 {
+                self.right_content.selected_elements.to_owned()
+            } else {
+                vec![self.right_content.command_result[self.right_content.position].name.to_owned()]
+            }
+        }
+    }
 }
 
 impl Drop for Screen {
@@ -407,6 +450,18 @@ struct Content {
 
 impl Content {
 
+    pub fn new(c_type: ContentType) -> Content {
+
+        Content {
+            is_selected: true,
+            start_from: 0,
+            position: 0,
+            c_type: c_type,
+            command_result: Vec::new(),
+            selected_elements: Vec::new(),
+        }
+    }
+
     pub fn update(&mut self) {
 
         match self.c_type {
@@ -416,4 +471,15 @@ impl Content {
             ContentType::Snapshots => { self.command_result = command::zfs_snapshots(); },
         }
     } 
+
+    pub fn next(&mut self) -> ContentType {
+
+        match self.c_type {
+            ContentType::Pools     => { ContentType::Datasets },
+            ContentType::Datasets  => { ContentType::Volumes },
+            ContentType::Volumes   => { ContentType::Snapshots },
+            ContentType::Snapshots => { ContentType::Pools },
+        }
+
+    }
 }
