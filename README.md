@@ -14,6 +14,7 @@ Instructions can be found here: https://www.rust-lang.org/tools/install
 
 To compile and install ZFS comamnder, run the following commands:
 
+    $ sudo apt install build-essential ncurses-dev
     $ make
     $ sudo make install
     $ make clean
