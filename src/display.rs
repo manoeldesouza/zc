@@ -37,8 +37,8 @@ impl Screen {
         getmaxyx(stdscr(), &mut max_y, &mut max_x);
 
         // let left_content = Content::new(ContentType::Datasets);
-        let left_content = Content::new(ContentType::Pools);
-        let right_content = Content::new(ContentType::Snapshots);
+        let left_content = Content::new(true, ContentType::Pools);
+        let right_content = Content::new(false, ContentType::Snapshots);
 
         Screen {
             max_y: 0,
@@ -247,10 +247,10 @@ impl Screen {
     fn switch_mode(&mut self) {
 
         if self.left_content.is_selected {
-            self.left_content = Content::new(self.left_content.next());
+            self.left_content = Content::new(true, self.left_content.next());
 
         } else {
-            self.right_content = Content::new(self.right_content.next());
+            self.right_content = Content::new(true, self.right_content.next());
         }
     }
 
@@ -450,10 +450,10 @@ struct Content {
 
 impl Content {
 
-    pub fn new(c_type: ContentType) -> Content {
+    pub fn new(is_selected: bool, c_type: ContentType) -> Content {
 
         Content {
-            is_selected: true,
+            is_selected: is_selected,
             start_from: 0,
             position: 0,
             c_type: c_type,
