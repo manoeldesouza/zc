@@ -1,5 +1,6 @@
 
 use std::process;
+use std::thread;
 
 pub struct CommandResult {
 
@@ -20,7 +21,7 @@ pub fn zfs_pools() -> Vec<CommandResult> {
 
 pub fn zfs_dataset() -> Vec<CommandResult> {
     let arguments = vec!["list", "-o", "name,used", "-H"];
-    run_command("zfs", &arguments)
+    list_command("zfs", &arguments)
 }
 
 pub fn zfs_volumes() -> Vec<CommandResult> {
@@ -35,13 +36,13 @@ pub fn zfs_volumes() -> Vec<CommandResult> {
 
 pub fn zfs_snapshots() -> Vec<CommandResult> {
     let arguments = vec!["list", "-H", "-o", "name,used", "-t", "snapshot"];
-    run_command("zfs", &arguments)
+    list_command("zfs", &arguments)
 }
 
-pub fn run_command(cmd: &str, arguments: &Vec<&str>) -> Vec<CommandResult> {
+pub fn list_command(cmd: &str, arguments: &Vec<&str>) -> Vec<CommandResult> {
 
     let mut command = process::Command::new(cmd);
-    let output = command.args(arguments).output().expect("Failure running command").stdout;
+    let output = command.args(arguments).output().expect("Failure running command: list_command").stdout;
     let command_output = String::from_utf8_lossy(&output).to_string();
 
     let lines: Vec<&str> = command_output.split("\n").collect();
@@ -71,4 +72,22 @@ pub fn run_command(cmd: &str, arguments: &Vec<&str>) -> Vec<CommandResult> {
     }
 
     result
+}
+
+pub fn run_command(cmd: &str, arguments: &Vec<&str>) {
+
+    let mut command = process::Command::new(cmd);
+    let _output = command.args(arguments).output().expect("Failure running command: run_command");
+}
+
+pub fn zfs_destroy(selected_elements: Vec<String>) {
+
+    thread::spawn(|| { 
+
+        for element in selected_elements {
+            let arguments = vec!["destroy", element.as_str()];
+
+            run_command("zfs", &arguments);
+        }
+    });
 }

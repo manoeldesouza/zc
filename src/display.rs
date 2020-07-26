@@ -10,7 +10,6 @@ use crate::command;
 const BOTTOM_BORDER_SIZE: usize = 3;
 
 
-#[allow(dead_code)]
 pub struct Screen {
 
     max_y: i32,
@@ -40,19 +39,19 @@ impl Screen {
         let left_content = Content {
             is_selected: true,
             start_from: 0,
-            window_size: (max_x as usize)-2,
             position: 0,
             c_type: ContentType::Datasets,
             command_result: Vec::new(),
+            selected_elements: Vec::new(),
         };
 
         let right_content = Content {
             is_selected: false,
             start_from: 0,
-            window_size: (max_x as usize)-2,
             position: 0,
             c_type: ContentType::Snapshots,
             command_result: Vec::new(),
+            selected_elements: Vec::new(),
         };
 
         Screen {
@@ -84,18 +83,18 @@ impl Screen {
         let key = wgetch(stdscr());
 
         match key {
-            // KEY_F1    => {},
+            KEY_F1    => {},
             KEY_F2    => {},
             KEY_F3    => {},
             KEY_F4    => {},
             KEY_F5    => {},
             KEY_F6    => {},
             KEY_F7    => {},
-            KEY_F8    => {},
+            KEY_F8    => { self.key_f8(); },
             KEY_F9    => {},
             KEY_F10   => { return Err(()); },
-            // KEY_F11   => {},
-            KEY_F12   => {},
+            KEY_F11   => {},
+            KEY_F12   => { self.test_windows(); },
 
             KEY_DL    => {},
 
@@ -114,19 +113,19 @@ impl Screen {
             KEY_IL    => {},
             KEY_TAB   => { self.switch_window(); },
 
-            KEY_F11   => { // TEST
-
-                let s = format!(" Left:  {} len: {}  ", self.left_content.position, self.left_content.command_result.len());
-                mvwprintw(stdscr(), 1, 1, s.as_str());
-                let s = format!(" Right: {} len: {}  ", self.right_content.position, self.right_content.command_result.len());
-                mvwprintw(stdscr(), 2, 1, s.as_str());
-                getch();
-            },
-
             _ => {},
         }
 
         Ok(())
+    }
+
+    fn test_windows(&self) {
+
+        let s = format!("  Left position: {} len: {}  ", self.left_content.position, self.left_content.command_result.len());
+        mvwprintw(stdscr(), 1, 1, s.as_str());
+        let s = format!(" Right position: {} len: {}  ", self.right_content.position, self.right_content.command_result.len());
+        mvwprintw(stdscr(), 2, 1, s.as_str());
+        getch();
     }
 
     fn switch_window(&mut self) {
@@ -220,6 +219,36 @@ impl Screen {
         }
     }
 
+    fn key_f8(&self) {
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     {  },
+            ContentType::Datasets =>  { command::zfs_destroy(selected_elements) },
+            ContentType::Volumes =>   {  },
+            ContentType::Snapshots => { command::zfs_destroy(selected_elements) },
+        };
+    }
+
+    fn selected_elements(&self) -> Vec<String> {
+
+        if self.left_content.is_selected {
+            if self.left_content.selected_elements.len() > 0 {
+                self.left_content.selected_elements.to_owned()
+            } else {
+                vec![self.left_content.command_result[self.left_content.position].name.to_owned()]
+            }
+
+        } else {
+            if self.right_content.selected_elements.len() > 0 {
+                self.right_content.selected_elements.to_owned()
+            } else {
+                vec![self.right_content.command_result[self.right_content.position].name.to_owned()]
+            }
+        }
+    }
+
     fn draw(&mut self) {
 
         getmaxyx(stdscr(), &mut self.max_y, &mut self.max_x);
@@ -270,26 +299,36 @@ impl Screen {
 
     fn draw_menu(&mut self) {
 
-        let mut menu = format!("{}{}{}{}{}{}{}{}{}{}",
-            " 1 ____ ",
-            " 2 ____ ",
-            " 3 ____ ",
-            " 4 ____ ", 
-            " 5 ____ ",
-            " 6 ____ ",
-            " 7 ____ ",
-            " 8 ____ ",
-            " 9 ____ ",
-            "10 Exit "
-        );
+        let pools_menu     = format!("P: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8_____ 9_____ 10Exit ");
+        let datasets_menu  = format!("D: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8Remov 9_____ 10Exit ");
+        let volumes_menu   = format!("V: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8_____ 9_____ 10Exit ");
+        let snapshots_menu = format!("S: 1_____ 2_____ 3_____ 4_____ 5_____ 6_____ 7_____ 8Remov 9_____ 10Exit ");
 
-        for _ in menu.len()..self.max_x as usize {
-            menu.push_str(" ");
+        let mut selected_menu: String;
+
+        match self.content_type() {
+            ContentType::Pools =>     { selected_menu = pools_menu; },
+            ContentType::Datasets =>  { selected_menu = datasets_menu; },
+            ContentType::Volumes =>   { selected_menu = volumes_menu; },
+            ContentType::Snapshots => { selected_menu = snapshots_menu; },
+        };
+
+        for _ in selected_menu.len()..self.max_x as usize {
+            selected_menu.push_str(" ");
         }
 
         wattron(stdscr(), A_BOLD());
-        mvwprintw(stdscr(), self.max_y-1, 0, menu.as_str());
+        mvwprintw(stdscr(), self.max_y-1, 0, selected_menu.as_str());
         wattroff(stdscr(), A_BOLD());
+    }
+
+    fn content_type(&self) -> &ContentType {
+
+        if self.left_content.is_selected {
+            &self.left_content.c_type
+        } else {
+            &self.right_content.c_type 
+        }
     }
 
     fn write_content(content: &Content, window: WINDOW, height: i32, width: i32) {
@@ -356,15 +395,14 @@ impl ContentType {
     }
 }
 
-#[allow(dead_code)]
 struct Content {
 
     is_selected: bool,
     start_from: usize,
-    window_size: usize,
     position: usize,
     c_type: ContentType,
     command_result: Vec<command::CommandResult>,
+    selected_elements: Vec<String>,
 }
 
 impl Content {
