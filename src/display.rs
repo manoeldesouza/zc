@@ -21,6 +21,9 @@ pub struct Screen {
 
 impl Screen {
 
+    const KEY_ESC:   i32 = 0x1b;
+    const KEY_ENTER: i32 = 0xa;
+
     pub fn new() -> Screen {
 
         initscr();
@@ -176,7 +179,18 @@ impl Screen {
     }
 
     fn key_f1(&self) { 
-        // TODO
+
+        // match self.confirm_dialog(" KEY_F1 ") {
+        //     Ok(_)  => {
+        //         let s = format!(" Ok  ");
+        //         mvwprintw(stdscr(), 3, 1, s.as_str());
+        //      },
+
+        //     Err(_) => {
+        //         let s = format!(" Err ");
+        //         mvwprintw(stdscr(), 3, 1, s.as_str());
+        //     },
+        // }
     }
 
     fn key_f2(&self) { 
@@ -214,13 +228,28 @@ impl Screen {
     fn key_f8(&self) {
 
         let selected_elements = self.selected_elements();
+        let selected_string = {
+            if selected_elements.len() == 1 {
+                selected_elements.get(0).unwrap().to_string()
+            } else {
+                format!("{} elements", selected_elements.len())
+            }
+        };
+
+        let title = " Confirm Destroy ";
+        let prompt = "The following element(s) will be destroyed: ";
+        let footnote = "ESC Cancel     ENTER Confirm";
+
+        if let Err(_) = self.confirm_dialog(title, prompt, selected_string.as_str(), footnote) {
+            return;
+        }
 
         match self.content_type() {
             ContentType::Pools =>     { command::zpool_destroy(selected_elements) },
             ContentType::Datasets =>  { command::zfs_destroy(selected_elements) },
             ContentType::Volumes =>   { command::zfs_destroy(selected_elements) },
             ContentType::Snapshots => { command::zfs_destroy(selected_elements) },
-        };
+        }
     }
 
     fn key_f9(&self) { 
@@ -261,14 +290,24 @@ impl Screen {
         } else if content.position - content.start_from > (height as usize - BOTTOM_BORDER_SIZE - 1) {
             content.start_from = content.position - (height as usize - BOTTOM_BORDER_SIZE - 1);
         }
+
+        if content.position > content.command_result.len()-2 {
+            content.position = content.command_result.len()-2;
+        }
     }
 
     fn test_windows(&self) {
 
         let s = format!("  Left position: {} len: {}  ", self.left_content.position, self.left_content.command_result.len());
         mvwprintw(stdscr(), 1, 1, s.as_str());
+
         let s = format!(" Right position: {} len: {}  ", self.right_content.position, self.right_content.command_result.len());
         mvwprintw(stdscr(), 2, 1, s.as_str());
+
+        let key = getch();
+        let s = format!(" Keystroke: 0x{:x}     ", key);
+        mvwprintw(stdscr(), 3, 1, s.as_str());
+
         getch();
     }
 
@@ -404,6 +443,37 @@ impl Screen {
                 self.right_content.selected_elements.to_owned()
             } else {
                 vec![self.right_content.command_result[self.right_content.position].name.to_owned()]
+            }
+        }
+    }
+
+    fn confirm_dialog(&self, title: &str, prompt: &str, info: &str, foot_note: &str) -> Result<(),()> {
+
+        let dialog_height = 8;
+        let dialog_width = 60;
+
+        let start_y = self.max_y/2 - dialog_height/2;
+        let start_x = self.max_x/2 - dialog_width/2;
+
+        let dialog = Screen::draw_window(dialog_height, dialog_width, start_y, start_x, title);
+        mvwprintw(dialog, 2, 3, prompt);
+        mvwprintw(dialog, 3, 3, info);
+
+        mvwprintw(dialog, 5, 3, "------------------------------------------------------");
+        let foot_x = dialog_width/2 - foot_note.len() as i32/2;
+        mvwprintw(dialog, 6, foot_x, foot_note);
+
+        wrefresh(dialog);
+
+        loop {
+            let key = getch();
+
+            if key == Screen::KEY_ENTER {
+                return Ok(())
+            }
+
+            if key == Screen::KEY_ESC {
+                return Err(())
             }
         }
     }
