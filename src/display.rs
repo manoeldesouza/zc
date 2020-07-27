@@ -1,4 +1,5 @@
 
+use std::char;
 use std::thread;
 use std::time;
 
@@ -136,10 +137,12 @@ impl Screen {
 
     fn key_down(&mut self) {
 
-        if self.left_content.is_selected && self.left_content.position+2 < self.left_content.command_result.len() {
+        if self.left_content.is_selected && 
+           self.left_content.position+2 < self.left_content.command_result.len() {
             self.left_content.position += 1;
     
-        } else if self.right_content.is_selected && self.right_content.position+2 < self.right_content.command_result.len() {
+        } else if self.right_content.is_selected && 
+           self.right_content.position+2 < self.right_content.command_result.len() {
             self.right_content.position += 1;                
         }
     }
@@ -152,6 +155,7 @@ impl Screen {
             } else {
                 self.left_content.position = 0;
             }
+
         } else if self.right_content.is_selected {
             if self.right_content.position > 10 {
                 self.right_content.position -= 10;
@@ -169,6 +173,7 @@ impl Screen {
             } else {
                 self.left_content.position = self.left_content.command_result.len()-2;
             }
+
         } else if self.right_content.is_selected {
             if self.right_content.position+11 < self.right_content.command_result.len() {
                 self.right_content.position += 10;
@@ -183,7 +188,27 @@ impl Screen {
     }
 
     fn key_f2(&self) { 
-        // TODO
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     { },
+            ContentType::Datasets =>  { self.input_dataset_create(selected_elements); },
+            ContentType::Volumes =>   { },
+            ContentType::Snapshots => { },
+        };
+    }
+
+    fn input_dataset_create(&self, selected_elements: Vec<String>) {
+
+        let selected_string = self.seleted_string(&selected_elements);
+
+        match self.input_dialog(" Create Dataset: ", "Enter the name of the new Dataset", selected_string.as_str()) {
+            Ok(dataset_name) => { command::zfs_create(dataset_name); },
+            Err(_)    => { },
+        }
+
+        wrefresh(stdscr());
     }
 
     fn key_f3(&self) { 
@@ -195,11 +220,51 @@ impl Screen {
     }
 
     fn key_f5(&self) { 
-        // TODO
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     { },
+            ContentType::Datasets =>  { self.input_snapshot_dataset(selected_elements); },
+            ContentType::Volumes =>   { },
+            ContentType::Snapshots => { },
+        };
+    }
+
+    fn input_snapshot_dataset(&self, selected_elements: Vec<String>) {
+
+        let selected_string = self.seleted_string(&selected_elements);
+
+        match self.input_dialog(" Snapshot Dataset: ", "Enter the name of the new Snapshot", selected_string.as_str()) {
+            Ok(dataset_name) => { command::zfs_snapshot(dataset_name); },
+            Err(_)    => { },
+        }
+
+        wrefresh(stdscr());
     }
 
     fn key_f6(&self) { 
-        // TODO
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     { },
+            ContentType::Datasets =>  { self.input_dataset_rename(selected_elements); },
+            ContentType::Volumes =>   { self.input_dataset_rename(selected_elements); },
+            ContentType::Snapshots => { self.input_dataset_rename(selected_elements); },
+        };
+    }
+
+    fn input_dataset_rename(&self, selected_elements: Vec<String>) {
+
+        let selected_string = self.seleted_string(&selected_elements);
+
+        match self.input_dialog(" Rename Dataset: ", "Enter the new name for the Dataset", selected_string.as_str()) {
+            Ok(new_dataset_name) => { command::zfs_rename(selected_string, new_dataset_name); },
+            Err(_)    => { },
+        }
+
+        wrefresh(stdscr());
     }
 
     fn key_f7(&self) {
@@ -207,11 +272,39 @@ impl Screen {
         let selected_elements = self.selected_elements();
 
         match self.content_type() {
-            ContentType::Pools =>     { command::zpool_scrub(selected_elements) },
+            ContentType::Pools =>     { self.confirm_pool_scrub(selected_elements); },
             ContentType::Datasets =>  { },
             ContentType::Volumes =>   { },
-            ContentType::Snapshots => { command::zfs_rollback(selected_elements) },
+            ContentType::Snapshots => { self.confirm_snapshot_rollback(selected_elements); },
         };
+    }
+
+    fn confirm_pool_scrub(&self, selected_elements: Vec<String>) {
+
+        let selected_string = self.seleted_string(&selected_elements);
+
+        let title = " Confirm Scrub: ";
+        let prompt = "The following pools(s) will be scrubbed: ";
+
+        if let Err(_) = self.confirm_dialog(title, prompt, selected_string.as_str()) {
+            return;
+        }
+
+        command::zpool_scrub(selected_elements);
+    }
+
+    fn confirm_snapshot_rollback(&self, selected_elements: Vec<String>) {
+
+        let selected_string = self.seleted_string(&selected_elements);
+
+        let title = " Confirm Rollback: ";
+        let prompt = "The Dataset(s) will be rolled back to the following snapshot(s): ";
+
+        if let Err(_) = self.confirm_dialog(title, prompt, selected_string.as_str()) {
+            return;
+        }
+
+        command::zfs_rollback(selected_elements);
     }
 
     fn key_f8(&self) {
@@ -219,11 +312,10 @@ impl Screen {
         let selected_elements = self.selected_elements();
         let selected_string = self.seleted_string(&selected_elements);
 
-        let title = " Confirm Destroy ";
+        let title = " Confirm Destroy: ";
         let prompt = "The following element(s) will be destroyed: ";
-        let footnote = "ESC Cancel     ENTER Confirm";
 
-        if let Err(_) = self.confirm_dialog(title, prompt, selected_string.as_str(), footnote) {
+        if let Err(_) = self.confirm_dialog(title, prompt, selected_string.as_str()) {
             return;
         }
 
@@ -274,7 +366,8 @@ impl Screen {
             content.start_from = content.position - (height as usize - BOTTOM_BORDER_SIZE - 1);
         }
 
-        if content.command_result.len() > 2 && content.position > content.command_result.len()-2 {
+        if content.command_result.len() > 2 && 
+           content.position > content.command_result.len()-2 {
             content.position = content.command_result.len()-2;
         }
     }
@@ -345,10 +438,10 @@ impl Screen {
 
     fn draw_menu(&mut self) {
 
-        let pools_menu     = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Remov 9 _____ 10 Exit ");
-        let datasets_menu  = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
-        let volumes_menu   = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 _____ 8 Remov 9 _____ 10 Exit ");
-        let snapshots_menu = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 RollB 8 Remov 9 _____ 10 Exit ");
+        let pools_menu     = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Destr 9 _____ 10 Exit ");
+        let datasets_menu  = format!(" 1 _____ 2 Creat 3 _____ 4 _____ 5 Snaps 6 Renam 7 _____ 8 Destr 9 _____ 10 Exit ");
+        let volumes_menu   = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 Renam 7 _____ 8 Destr 9 _____ 10 Exit ");
+        let snapshots_menu = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 Renam 7 RollB 8 Destr 9 _____ 10 Exit ");
 
         let mut selected_menu: String;
 
@@ -430,7 +523,7 @@ impl Screen {
         }
     }
 
-    fn confirm_dialog(&self, title: &str, prompt: &str, info: &str, foot_note: &str) -> Result<(),()> {
+    fn input_dialog(&self, title: &str, prompt: &str, info: &str) -> Result<String,()> {
 
         let dialog_height = 8;
         let dialog_width = 70;
@@ -438,13 +531,64 @@ impl Screen {
         let start_y = self.max_y/2 - dialog_height/2;
         let start_x = self.max_x/2 - dialog_width/2;
 
+        let footnote = "ESC Cancel     ENTER Confirm";
+
+        let dialog = Screen::draw_window(dialog_height, dialog_width, start_y, start_x, title);
+        mvwprintw(dialog, 2, 3, prompt);
+        wattroff(dialog, A_REVERSE());
+
+        mvwprintw(dialog, 5, 3, "----------------------------------------------------------------");
+        let foot_x = dialog_width/2 - footnote.len() as i32/2;
+        mvwprintw(dialog, 6, foot_x, footnote);
+
+        wattron(dialog, A_REVERSE());
+        mvwprintw(dialog, 3, 3, "                                                                ");
+        mvwprintw(dialog, 3, 3, info);
+
+        wrefresh(dialog);
+
+        let mut input = String::from(info);
+        let mut _input_scr = String::new();
+
+        loop {
+            let key = getch();
+
+            match key {
+                Screen::KEY_ENTER => { return Ok(input.to_owned()) },
+                Screen::KEY_ESC   => { return Err(())   },
+                0x20..=0x7f       => { input.push(char::from_u32(key as u32).unwrap()); },
+                KEY_BACKSPACE     => { input.pop(); }
+                _                 => {},
+            }
+
+            let input_size = input.len();
+            _input_scr = input.clone();
+            for _ in input_size..64 {
+                _input_scr.push(' ');
+            }
+
+            mvwprintw(dialog, 3, 3, _input_scr.as_str());
+            wrefresh(dialog);
+        }
+    }
+    
+    fn confirm_dialog(&self, title: &str, prompt: &str, info: &str) -> Result<(),()> {
+
+        let dialog_height = 8;
+        let dialog_width = 70;
+
+        let start_y = self.max_y/2 - dialog_height/2;
+        let start_x = self.max_x/2 - dialog_width/2;
+
+        let footnote = "ESC Cancel     ENTER Confirm";
+
         let dialog = Screen::draw_window(dialog_height, dialog_width, start_y, start_x, title);
         mvwprintw(dialog, 2, 3, prompt);
         mvwprintw(dialog, 3, 3, info);
 
         mvwprintw(dialog, 5, 3, "----------------------------------------------------------------");
-        let foot_x = dialog_width/2 - foot_note.len() as i32/2;
-        mvwprintw(dialog, 6, foot_x, foot_note);
+        let foot_x = dialog_width/2 - footnote.len() as i32/2;
+        mvwprintw(dialog, 6, foot_x, footnote);
 
         wrefresh(dialog);
 

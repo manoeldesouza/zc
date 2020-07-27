@@ -60,6 +60,36 @@ pub fn is_zfs_installed() -> bool {
 }
 
 
+pub fn zfs_create(dataset_name: String) {
+
+    thread::spawn(move || { 
+
+        let arguments = vec!["create", dataset_name.as_str()];
+
+        run_command("zfs", &arguments);
+    });
+}
+
+pub fn zfs_rename(old_dataset_name: String, new_dataset_name: String) {
+
+    thread::spawn(move || { 
+
+        let arguments = vec!["rename", old_dataset_name.as_str(), new_dataset_name.as_str()];
+
+        run_command("zfs", &arguments);
+    });
+}
+
+pub fn zfs_snapshot(dataset_name: String) {
+
+    thread::spawn(move || { 
+
+        let arguments = vec!["snapshot", dataset_name.as_str()];
+
+        run_command("zfs", &arguments);
+    });
+}
+
 pub fn zfs_pools() -> Vec<CommandResult> {
     
     let arguments = vec!["list", "-o", "name,size", "-H"];
