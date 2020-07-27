@@ -179,18 +179,7 @@ impl Screen {
     }
 
     fn key_f1(&self) { 
-
-        // match self.confirm_dialog(" KEY_F1 ") {
-        //     Ok(_)  => {
-        //         let s = format!(" Ok  ");
-        //         mvwprintw(stdscr(), 3, 1, s.as_str());
-        //      },
-
-        //     Err(_) => {
-        //         let s = format!(" Err ");
-        //         mvwprintw(stdscr(), 3, 1, s.as_str());
-        //     },
-        // }
+        // TODO
     }
 
     fn key_f2(&self) { 
@@ -228,13 +217,7 @@ impl Screen {
     fn key_f8(&self) {
 
         let selected_elements = self.selected_elements();
-        let selected_string = {
-            if selected_elements.len() == 1 {
-                selected_elements.get(0).unwrap().to_string()
-            } else {
-                format!("{} elements", selected_elements.len())
-            }
-        };
+        let selected_string = self.seleted_string(&selected_elements);
 
         let title = " Confirm Destroy ";
         let prompt = "The following element(s) will be destroyed: ";
@@ -291,7 +274,7 @@ impl Screen {
             content.start_from = content.position - (height as usize - BOTTOM_BORDER_SIZE - 1);
         }
 
-        if content.position > content.command_result.len()-2 {
+        if content.command_result.len() > 2 && content.position > content.command_result.len()-2 {
             content.position = content.command_result.len()-2;
         }
     }
@@ -450,7 +433,7 @@ impl Screen {
     fn confirm_dialog(&self, title: &str, prompt: &str, info: &str, foot_note: &str) -> Result<(),()> {
 
         let dialog_height = 8;
-        let dialog_width = 60;
+        let dialog_width = 70;
 
         let start_y = self.max_y/2 - dialog_height/2;
         let start_x = self.max_x/2 - dialog_width/2;
@@ -459,7 +442,7 @@ impl Screen {
         mvwprintw(dialog, 2, 3, prompt);
         mvwprintw(dialog, 3, 3, info);
 
-        mvwprintw(dialog, 5, 3, "------------------------------------------------------");
+        mvwprintw(dialog, 5, 3, "----------------------------------------------------------------");
         let foot_x = dialog_width/2 - foot_note.len() as i32/2;
         mvwprintw(dialog, 6, foot_x, foot_note);
 
@@ -475,6 +458,15 @@ impl Screen {
             if key == Screen::KEY_ESC {
                 return Err(())
             }
+        }
+    }
+
+    fn seleted_string(&self, selected_elements: &Vec<String>) -> String {
+
+        if selected_elements.len() == 1 {
+            selected_elements.get(0).unwrap().to_string()
+        } else {
+            format!("{} elements", selected_elements.len())
         }
     }
 }
