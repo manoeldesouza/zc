@@ -1,5 +1,6 @@
 # ZC - ZFS Commander
 An ZFS administration tool inspired on Midnight commander
+
 *Work in Progress*
 
 ## Description
@@ -41,8 +42,9 @@ As the execution of some ZFS operations require higher privilege run ZFS command
 
 ### Operation
 
-Use TAB key to switch between the modes available. Use LEFT or RIGHT keys to navigate in between the two windows.
+Use TAB key to switch between the modes available. 
 
+Use LEFT or RIGHT keys to navigate in between the two windows.
 
 **Function Keys per Mode**
 

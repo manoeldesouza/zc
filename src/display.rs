@@ -54,16 +54,23 @@ impl Screen {
 
     pub fn run(&mut self) {
 
+        self.update_content();
+
         loop {
+
             self.draw();
 
-            if self.handle_keys() == Err(()) { break; };
+            let should_update = match self.handle_keys() {
+                Err(_) => { break; },
+                Ok(should_update) => should_update,
+            };
 
             thread::sleep(time::Duration::from_millis(10));
+            if should_update == true { self.update_content(); }
         }
     }
 
-    fn handle_keys(&mut self) -> Result<(),()> {
+    fn handle_keys(&mut self) -> Result<bool,()> {
 
         const KEY_TAB: i32 = 0x9;
         const KEY_PUP: i32 = 0x153;
@@ -72,15 +79,15 @@ impl Screen {
         let key = wgetch(stdscr());
 
         match key {
-            KEY_F1    => { self.key_f1(); },
-            KEY_F2    => { self.key_f2(); },
-            KEY_F3    => { self.key_f3(); },
-            KEY_F4    => { self.key_f4(); },
-            KEY_F5    => { self.key_f5(); },
-            KEY_F6    => { self.key_f6(); },
-            KEY_F7    => { self.key_f7(); },
-            KEY_F8    => { self.key_f8(); },
-            KEY_F9    => { self.key_f9(); },
+            KEY_F1    => { self.key_f1(); return Ok(true); },
+            KEY_F2    => { self.key_f2(); return Ok(true); },
+            KEY_F3    => { self.key_f3(); return Ok(true); },
+            KEY_F4    => { self.key_f4(); return Ok(true); },
+            KEY_F5    => { self.key_f5(); return Ok(true); },
+            KEY_F6    => { self.key_f6(); return Ok(true); },
+            KEY_F7    => { self.key_f7(); return Ok(true); },
+            KEY_F8    => { self.key_f8(); return Ok(true); },
+            KEY_F9    => { self.key_f9(); return Ok(true); },
             KEY_F10   => { return Err(()); },
             KEY_F11   => { self.key_f11(); },
             KEY_F12   => { self.test_windows(); },
@@ -96,16 +103,16 @@ impl Screen {
             KEY_PUP   => { self.key_pgup(); }
             KEY_PDN   => { self.key_pgdown(); }
 
-            KEY_LEFT  => { self.switch_window(); },
-            KEY_RIGHT => { self.switch_window(); },
+            KEY_LEFT  => { self.switch_window(); return Ok(true); },
+            KEY_RIGHT => { self.switch_window(); return Ok(true); },
 
             KEY_IL    => {},
-            KEY_TAB   => { self.switch_mode(); },
+            KEY_TAB   => { self.switch_mode(); return Ok(true); },
 
             _ => {},
         }
 
-        Ok(())
+        Ok(false)
     }
 
     fn key_home(&mut self) {
@@ -226,7 +233,6 @@ impl Screen {
             ContentType::Snapshots => { },
         };
     }
-
 
     fn key_f5(&self) { 
 
@@ -358,7 +364,6 @@ impl Screen {
         // TODO
     }
 
-
     fn switch_window(&mut self) {
 
         if self.left_content.is_selected {
@@ -410,7 +415,6 @@ impl Screen {
         getch();
     }
 
-
     fn draw(&mut self) {
 
         getmaxyx(stdscr(), &mut self.max_y, &mut self.max_x);
@@ -428,7 +432,7 @@ impl Screen {
         let left_title = self.left_content.c_type.text();
 
         let left_window = Screen::draw_window(left_height-1, left_width, left_start_y, left_start_x, left_title.as_str());
-        self.left_content.update();
+        // self.left_content.update();
         Screen::scroll_window(&mut self.left_content, left_height);
         Screen::write_content(&self.left_content, left_window, left_height, left_width);
 
@@ -439,7 +443,7 @@ impl Screen {
         let right_title = self.right_content.c_type.text();
 
         let right_window = Screen::draw_window(right_height-1, right_width, right_start_y, right_start_x, right_title.as_str());
-        self.right_content.update();
+        // self.right_content.update();
         Screen::scroll_window(&mut self.right_content, right_height);
         Screen::write_content(&self.right_content, right_window, right_height, right_width);
 
@@ -511,6 +515,11 @@ impl Screen {
             mvwprintw(window, content_position, TOP_CONTENT_X, text.as_str());
             wattroff(window, A_REVERSE());
         }
+    }
+
+    fn update_content(&mut self) {
+        self.left_content.update();
+        self.right_content.update();
     }
 
     fn fit_to_window(result_name: &str, width: usize) -> String {

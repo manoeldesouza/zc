@@ -59,7 +59,6 @@ pub fn is_zfs_installed() -> bool {
     output.contains("zfs")
 }
 
-
 pub fn zfs_create(dataset_name: String) {
 
     thread::spawn(move || { 
