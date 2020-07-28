@@ -6,6 +6,9 @@ An ZFS administration tool inspired on Midnight commander
 
 ZFS Commander is a simple front-end for the most commonly used zpool & zfs commands.
 
+![ZFS Commander](/screenshot/zc-draft-01.png)
+![ZFS Commander](/screenshot/zc-draft-02.png)
+
 
 ## Installation 
 
