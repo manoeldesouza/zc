@@ -217,13 +217,26 @@ impl Screen {
 
     fn key_f4(&self) { 
 
-        let selected_elements = self.selected_elements();
+        // let selected_elements = self.selected_elements();
 
         match self.content_type() {
             ContentType::Pools =>     { },
             ContentType::Datasets =>  { },
             ContentType::Volumes =>   { },
-            ContentType::Snapshots => { self.input_snapshot_clone(selected_elements); },
+            ContentType::Snapshots => { },
+        };
+    }
+
+
+    fn key_f5(&self) { 
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     { },
+            ContentType::Datasets =>  { self.input_snapshot_dataset(selected_elements); },
+            ContentType::Volumes =>   { self.input_snapshot_dataset(selected_elements); },
+            ContentType::Snapshots => { self.input_snapshot_clone(selected_elements);   },
         };
     }
 
@@ -237,18 +250,6 @@ impl Screen {
         }
 
         wrefresh(stdscr());
-    }
-
-    fn key_f5(&self) { 
-
-        let selected_elements = self.selected_elements();
-
-        match self.content_type() {
-            ContentType::Pools =>     { },
-            ContentType::Datasets =>  { self.input_snapshot_dataset(selected_elements); },
-            ContentType::Volumes =>   { },
-            ContentType::Snapshots => { },
-        };
     }
 
     fn input_snapshot_dataset(&self, selected_elements: Vec<String>) {
@@ -462,8 +463,8 @@ impl Screen {
 
         let pools_menu     = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Destr 9 _____ 10 Exit ");
         let datasets_menu  = format!(" 1 _____ 2 Creat 3 _____ 4 _____ 5 Snaps 6 Renam 7 _____ 8 Destr 9 _____ 10 Exit ");
-        let volumes_menu   = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 Renam 7 _____ 8 Destr 9 _____ 10 Exit ");
-        let snapshots_menu = format!(" 1 _____ 2 _____ 3 _____ 4 Clone 5 _____ 6 Renam 7 RollB 8 Destr 9 _____ 10 Exit ");
+        let volumes_menu   = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 Snaps 6 Renam 7 _____ 8 Destr 9 _____ 10 Exit ");
+        let snapshots_menu = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 Clone 6 Renam 7 RollB 8 Destr 9 _____ 10 Exit ");
 
         let mut selected_menu: String;
 

@@ -45,7 +45,7 @@ Use TAB key to switch between the modes available. Use LEFT or RIGHT keys to nav
 |**F1** |         -       |        -      |        -      |        -      |
 |**F2** |         -       | *zfs create*  |        -      |        -      |
 |**F3** |         -       |        -      |        -      |        -      |
-|**F4** |         -       |        -      |  *zfs clone*  |        -      |
+|**F4** |         -       |  *zfs clone*  |  *zfs clone*  |  *zfs clone*  |
 |**F5** |         -       |*zfs snapshot* |        -      |        -      |
 |**F6** |         -       |  *zfs rename* |  *zfs rename* |  *zfs rename* |
 |**F7** |  *zpool scrub*  |        -      | *zfs rollback*|        -      |
