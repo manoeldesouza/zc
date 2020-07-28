@@ -216,7 +216,27 @@ impl Screen {
     }
 
     fn key_f4(&self) { 
-        // TODO
+
+        let selected_elements = self.selected_elements();
+
+        match self.content_type() {
+            ContentType::Pools =>     { },
+            ContentType::Datasets =>  { },
+            ContentType::Volumes =>   { },
+            ContentType::Snapshots => { self.input_snapshot_clone(selected_elements); },
+        };
+    }
+
+    fn input_snapshot_clone(&self, selected_elements: Vec<String>) {
+
+        let selected_string = self.seleted_string(&selected_elements);
+
+        match self.input_dialog(" Clone Snapshot: ", "Enter the name of the new Snapshot", "") {
+            Ok(dataset_name) => { command::zfs_clone(selected_string, dataset_name); },
+            Err(_)    => { },
+        }
+
+        wrefresh(stdscr());
     }
 
     fn key_f5(&self) { 
@@ -235,7 +255,9 @@ impl Screen {
 
         let selected_string = self.seleted_string(&selected_elements);
 
-        match self.input_dialog(" Snapshot Dataset: ", "Enter the name of the new Snapshot", selected_string.as_str()) {
+        let snapshot = format!("{}@", selected_string);
+
+        match self.input_dialog(" Snapshot Dataset: ", "Enter the name of the new Snapshot", snapshot.as_str()) {
             Ok(dataset_name) => { command::zfs_snapshot(dataset_name); },
             Err(_)    => { },
         }
@@ -441,7 +463,7 @@ impl Screen {
         let pools_menu     = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Destr 9 _____ 10 Exit ");
         let datasets_menu  = format!(" 1 _____ 2 Creat 3 _____ 4 _____ 5 Snaps 6 Renam 7 _____ 8 Destr 9 _____ 10 Exit ");
         let volumes_menu   = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 Renam 7 _____ 8 Destr 9 _____ 10 Exit ");
-        let snapshots_menu = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 Renam 7 RollB 8 Destr 9 _____ 10 Exit ");
+        let snapshots_menu = format!(" 1 _____ 2 _____ 3 _____ 4 Clone 5 _____ 6 Renam 7 RollB 8 Destr 9 _____ 10 Exit ");
 
         let mut selected_menu: String;
 

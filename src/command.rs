@@ -80,11 +80,21 @@ pub fn zfs_rename(old_dataset_name: String, new_dataset_name: String) {
     });
 }
 
-pub fn zfs_snapshot(dataset_name: String) {
+pub fn zfs_clone(snapshot_name: String, new_dataset_name: String) {
 
     thread::spawn(move || { 
 
-        let arguments = vec!["snapshot", dataset_name.as_str()];
+        let arguments = vec!["clone", snapshot_name.as_str(), new_dataset_name.as_str()];
+
+        run_command("zfs", &arguments);
+    });
+}
+
+pub fn zfs_snapshot(snapshot_name: String) {
+
+    thread::spawn(move || { 
+
+        let arguments = vec!["snapshot", snapshot_name.as_str()];
 
         run_command("zfs", &arguments);
     });
