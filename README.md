@@ -1,10 +1,15 @@
 # ZC - ZFS Commander
 An ZFS administration tool inspired on Midnight commander
-
+*Work in Progress*
 
 ## Description
 
-ZFS Commander is a simple front-end for the most commonly used zpool & zfs commands.
+ZFS Commander is a simple front-end for the most commonly used zpool & zfs commands. While the tool is a work-in-progress, 
+several functions are already working. See the list of functions implemented in Usage section.
+
+The tool is composed of 2 windows, each showing different ZFS related information. The tool will start with Datasets at left
+and Snapshots at the right window. By pressing TAB, each window will cycle through the different modes: Pools, Datasets, 
+Volumes and Snapshots.
 
 ![ZFS Commander](https://github.com/manoeldesouza/zc/blob/master/screenshots/zc-draft-01.png)
 ![ZFS Commander](https://github.com/manoeldesouza/zc/blob/master/screenshots/zc-draft-02.png)
@@ -39,9 +44,7 @@ As the execution of some ZFS operations require higher privilege run ZFS command
 Use TAB key to switch between the modes available. Use LEFT or RIGHT keys to navigate in between the two windows.
 
 
-
-
-### Function Keys per Mode
+**Function Keys per Mode**
 
 |  Key  |       Pool      |    Dataset    |    Snapshot   |     Volume    |
 |:-----:|:---------------:|:-------------:|:-------------:|:-------------:|
