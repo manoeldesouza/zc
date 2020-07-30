@@ -29,7 +29,7 @@ impl Screen {
         loop {
 
             self.draw();
-            if self.handle_keys() == false { break; };
+            if !self.handle_keys() { break; };
             self.update_content();
         }
     }
@@ -150,10 +150,10 @@ impl Screen {
 
     fn draw_menu(&mut self) {
 
-        let pools_menu     = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Destr 9 _____ 10 Exit ");
-        let datasets_menu  = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 Snaps 6 Renam 7 Creat 8 Destr 9 _____ 10 Exit ");
-        let volumes_menu   = format!(" 1 _____ 2 _____ 3 _____ 4 _____ 5 Snaps 6 Renam 7 Creat 8 Destr 9 _____ 10 Exit ");
-        let snapshots_menu = format!(" 1 _____ 2 Diff  3 _____ 4 _____ 5 Clone 6 Renam 7 RollB 8 Destr 9 _____ 10 Exit ");
+        let pools_menu     = " 1 _____ 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Destr 9 _____ 10 Exit ".to_string();
+        let datasets_menu  = " 1 _____ 2 _____ 3 _____ 4 _____ 5 Snaps 6 Renam 7 Creat 8 Destr 9 GetAl 10 Exit ".to_string();
+        let volumes_menu   = " 1 _____ 2 _____ 3 _____ 4 _____ 5 Snaps 6 Renam 7 Creat 8 Destr 9 GetAl 10 Exit ".to_string();
+        let snapshots_menu = " 1 _____ 2 Diff  3 _____ 4 _____ 5 Clone 6 Renam 7 RollB 8 Destr 9 GetAl 10 Exit ".to_string();
 
         let mut selected_menu: String;
 

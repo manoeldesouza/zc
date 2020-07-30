@@ -26,10 +26,10 @@ impl Content {
     pub fn new(is_selected: bool, c_type: ContentType) -> Content {
 
         Content {
-            is_selected: is_selected,
+            is_selected,
             start_from: 0,
             position: 0,
-            c_type: c_type,
+            c_type,
             command_result: Vec::new(),
             selected_elements: Vec::new(),
         }
@@ -53,7 +53,6 @@ impl Content {
             ContentType::Volumes   => { ContentType::Snapshots },
             ContentType::Snapshots => { ContentType::Pools },
         }
-
     }
 
     pub fn jump_to(&mut self, position: i32) {
@@ -197,7 +196,15 @@ impl Content {
     }
 
     pub fn key_f9(&self) {
-        // TODO
+
+        let selected_elements = self.selected_elements();
+
+        match self.c_type {
+            ContentType::Pools =>     { },
+            ContentType::Datasets =>  { Content::result_get_all(selected_elements) },
+            ContentType::Volumes =>   { Content::result_get_all(selected_elements) },
+            ContentType::Snapshots => { Content::result_get_all(selected_elements) },
+        }
     }
 
     pub fn selected_elements(&self) -> Vec<String> {
@@ -291,18 +298,28 @@ impl Content {
 
         let selected_string = Content::seleted_string(&selected_elements);
 
-        match dialog::two_input_dialog(" Diff Dataset: ", "Enter the name of the first and second Snapshots", selected_string.as_str(), selected_string.as_str()) {
+        match dialog::two_input_dialog(" Diff Dataset: ", "Enter the name of the first and second Snapshots",
+            selected_string.as_str(), selected_string.as_str()) {
             Ok(snapshots) => { 
 
                 let snapshot_1 = snapshots.0;
                 let snapshot_2 = snapshots.1;
 
-                command::zfs_diff(snapshot_1, snapshot_2);
+                let output = command::zfs_diff(snapshot_1, snapshot_2);
+                dialog::result_dialog(" Snapshot Diff ", "[ M modified | - removed | + created | R renamed ]", output.lines().collect());
             },
             Err(_)    => { },
         }
 
         dialog::refresh_screen();
+    }
+
+    fn result_get_all(selected_elements: Vec<String>) {
+
+        let selected_string = Content::seleted_string(&selected_elements);
+        let output = command::zfs_get_all(selected_string);
+        dialog::result_dialog(" Snapshot Diff ", "[ NAME | PROPERTY | VALUE | SOURCE ]", output.lines().collect());
+
     }
 
     fn input_snapshot_clone(selected_elements: Vec<String>) {
@@ -321,7 +338,8 @@ impl Content {
 
         let selected_string = Content::seleted_string(&selected_elements);
 
-        match dialog::input_dialog(" Rename Dataset: ", "Enter the new name for the Dataset", selected_string.as_str()) {
+        match dialog::input_dialog(" Rename Dataset: ", "Enter the new name for the Dataset",
+            selected_string.as_str()) {
             Ok(new_dataset_name) => { command::zfs_rename(selected_string, new_dataset_name); },
             Err(_)    => { },
         }

@@ -1,6 +1,5 @@
 
 use std::process;
-use crate::dialog;
 
 pub struct CommandResult {
 
@@ -33,8 +32,8 @@ pub fn list_command(cmd: &str, arguments: &Vec<&str>) -> Vec<CommandResult> {
         };
 
         let command_result = CommandResult {
-            name: name,
-            used: used,
+            name,
+            used,
         };
         
         result.push(command_result);
@@ -122,12 +121,16 @@ pub fn zfs_destroy(selected_elements: Vec<String>) {
     }
 }
 
-pub fn zfs_diff(snapshot_1: String, snapshot_2: String) {
+pub fn zfs_diff(snapshot_1: String, snapshot_2: String) -> String {
 
     let arguments = vec!["diff", snapshot_1.as_str(), snapshot_2.as_str()];
-    let output = run_command("zfs", &arguments);
+    run_command("zfs", &arguments)
+}
 
-    dialog::result_dialog(" Snapshot Diff ", "[ M modified | - removed | + created | R renamed ]", output.lines().collect());
+pub fn zfs_get_all(dataset: String) -> String {
+
+    let arguments = vec!["get", "all", dataset.as_str()];
+    run_command("zfs", &arguments)
 }
 
 pub fn zfs_rollback(selected_elements: Vec<String>) {

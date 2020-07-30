@@ -112,7 +112,7 @@ pub fn input_dialog(title: &str, prompt: &str, info: &str) -> Result<String,()> 
         let key = getch();
 
         match key {
-            KEY_ENTER      => { return Ok(input.to_owned()) },
+            KEY_ENTER      => { return Ok(input) },
             KEY_ESC        => { return Err(())   },
             0x20..=0x7f    => { input.push(char::from_u32(key as u32).unwrap()); },
             KEY_BACKSPACE  => { input.pop(); }
@@ -172,10 +172,10 @@ pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str) -> 
         let key = getch();
 
         match key {
-            KEY_ENTER      => { return Ok((input1.to_owned(), input2.to_owned())) },
+            KEY_ENTER      => { return Ok((input1, input2)) },
             KEY_ESC        => { return Err(())   },
             0x20..=0x7f    => { 
-                if is_input1_selected == true {
+                if is_input1_selected {
                     input1.push(char::from_u32(key as u32).unwrap());
 
                 } else {
@@ -183,7 +183,7 @@ pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str) -> 
                 }
             },
             KEY_BACKSPACE  => { 
-                if is_input1_selected == true {
+                if is_input1_selected {
                     input1.pop(); 
                 } else {
                     input2.pop();
@@ -308,6 +308,10 @@ pub fn result_dialog(title: &str, prompt: &str, info: Vec<&str>) {
             start_from -= 1;
         } else if key == KEY_DOWN {
             start_from += 1;
+        } else if key == KEY_PPAGE {
+            start_from -= 10;
+        } else if key == KEY_NPAGE {
+            start_from += 10;
         }
     }
 }

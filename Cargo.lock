@@ -31,7 +31,7 @@ checksum = "d36492546b6af1463394d46f0c834346f31548646f6ba10849802c9c9a27ac33"
 
 [[package]]
 name = "zc"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "ncurses",
 ]

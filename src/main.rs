@@ -7,7 +7,7 @@ mod command;
 mod content;
 
 
-const VERSION: &str = "0.8.0";
+const VERSION: &str = "0.9.0";
 const RELEASE: &str = "30-Jul-2020";
 
 fn main() {
