@@ -1,6 +1,8 @@
 
 mod display;
+mod dialog;
 mod command;
+mod content;
 
 fn main() {
 
