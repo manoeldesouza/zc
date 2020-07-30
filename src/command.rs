@@ -127,7 +127,7 @@ pub fn zfs_diff(snapshot_1: String, snapshot_2: String) {
     let arguments = vec!["diff", snapshot_1.as_str(), snapshot_2.as_str()];
     let output = run_command("zfs", &arguments);
 
-    dialog::result_dialog(" Snapshot Diff ", "Legend:", output.lines().collect());
+    dialog::result_dialog(" Snapshot Diff ", "[ M modified | - removed | + created | R renamed ]", output.lines().collect());
 }
 
 pub fn zfs_rollback(selected_elements: Vec<String>) {

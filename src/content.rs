@@ -80,22 +80,7 @@ impl Content {
     }
 
     pub fn scroll(&mut self, height: i32) {
-
-        if self.position < 0 {
-            self.start_from = 0;
-        } 
-        
-        if self.start_from < 0 {
-            self.start_from = 0;
-        }
-            
-        if self.position < self.start_from {
-            self.start_from = self.position;
-        } 
-        
-        if self.position >= self.start_from + height-1 {
-            self.start_from = self.position - height+2;
-        }
+        self.start_from = dialog::scroll(self.position, self.start_from, height);
     }
 
     pub fn write(&self, window: WINDOW, height: i32, width: i32) {

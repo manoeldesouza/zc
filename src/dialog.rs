@@ -48,6 +48,27 @@ pub fn finish() {
     endwin();
 }
 
+pub fn scroll(position: i32, mut start_from: i32, height: i32) -> i32 {
+
+    if position < 0 {
+        start_from = 0;
+    } 
+    
+    if start_from < 0 {
+        start_from = 0;
+    }
+        
+    if position < start_from {
+        start_from = position;
+    } 
+    
+    if position >= start_from + height-1 {
+        start_from = position - height+2;
+    }
+
+    start_from
+}
+
 pub fn window(height: i32, width: i32, start_y: i32, start_x: i32, title: &str) -> WINDOW {
 
     let win = newwin(height, width, start_y, start_x);
@@ -142,7 +163,10 @@ pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str) -> 
     let mut input1 = String::from(info1);
     let mut input2 = String::from(info2);
 
-    let mut is_input1_selected = true;
+    let mut is_input1_selected = false;
+    if info1.is_empty() {
+        is_input1_selected = true;
+    };
 
     loop {
         let key = getch();
@@ -245,24 +269,45 @@ pub fn result_dialog(title: &str, prompt: &str, info: Vec<&str>) {
     let dialog = window(dialog_height, dialog_width, start_y, start_x, title);
     mvwprintw(dialog, 2, 3, prompt);
 
-    for (i, line) in info.iter().enumerate() {
-
-        mvwprintw(dialog, 3+(i as i32), 3, line);
-    }
-
     let bar_x = dialog_width/2 - bar.len() as i32/2;
     mvwprintw(dialog, dialog_height-3, bar_x, bar);
     let foot_x = dialog_width/2 - footnote.len() as i32/2;
     mvwprintw(dialog, dialog_height-2, foot_x, footnote);
 
+    let mut start_from = 0;
+    let height = dialog_height - 6;
+    let width = (dialog_width - 6) as usize;
+
     loop {
+
+        if start_from < 0 {
+            start_from = 0;
+        }
+
+        if start_from >= info.len() as i32 - height {
+            start_from = info.len() as i32 - height;
+        }
+
+        for (i, line) in info.iter().enumerate() {
+
+            if (i as i32) < start_from { continue }
+            if (i as i32) >= height + start_from { break }
+
+            let text = fit_to_window(line, width);
+
+            mvwprintw(dialog, 3+(i as i32)-start_from, 3, text.as_str());
+        }   
 
         wrefresh(dialog);
 
         let key = getch();
 
-        if key == KEY_ENTER || key == KEY_ESC {
-            return //Ok(())
+        if key == KEY_ENTER || key == KEY_ESC || key == KEY_F10 {
+            return
+        } else if key == KEY_UP {
+            start_from -= 1;
+        } else if key == KEY_DOWN {
+            start_from += 1;
         }
     }
 }
