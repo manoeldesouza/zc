@@ -57,7 +57,7 @@ impl Content {
 
     pub fn jump_to(&mut self, position: i32) {
 
-        if position < 0 || self.command_result.len() == 0 {
+        if position < 0 || self.command_result.is_empty() {
             self.position = 0   
 
         } else if position as usize >= self.command_result.len()-2 {
@@ -116,7 +116,7 @@ impl Content {
     }
 
     pub fn key_f1(&mut self) {
-        // TODO
+        Content::help();
     }
 
     pub fn key_f2(&mut self) {
@@ -170,7 +170,7 @@ impl Content {
         match self.c_type {
             ContentType::Pools =>     { Content::confirm_pool_scrub(selected_elements); },
             ContentType::Datasets =>  { Content::input_dataset_create(selected_elements); },
-            ContentType::Volumes =>   { Content::input_volume_create(); },
+            ContentType::Volumes =>   { Content::input_volume_create(selected_elements); },
             ContentType::Snapshots => { Content::confirm_snapshot_rollback(selected_elements); },
         }
     }
@@ -180,10 +180,10 @@ impl Content {
         let selected_elements = self.selected_elements();
         let selected_string = Content::seleted_string(&selected_elements);
 
-        let title = " Confirm Destroy: ";
+        let title = " Confirm Destroy ";
         let prompt = "The following element(s) will be destroyed: ";
 
-        if let Err(_) = dialog::confirm_dialog(title, prompt, selected_string.as_str()) {
+        if dialog::confirm_dialog(title, prompt, selected_string.as_str()).is_err() {
             return;
         }
 
@@ -200,23 +200,28 @@ impl Content {
         let selected_elements = self.selected_elements();
 
         match self.c_type {
-            ContentType::Pools =>     { },
-            ContentType::Datasets =>  { Content::result_get_all(selected_elements) },
-            ContentType::Volumes =>   { Content::result_get_all(selected_elements) },
-            ContentType::Snapshots => { Content::result_get_all(selected_elements) },
+            ContentType::Pools =>     { Content::result_zpool_get_all(selected_elements) },
+            ContentType::Datasets =>  { Content::result_zfs_get_all(selected_elements) },
+            ContentType::Volumes =>   { Content::result_zfs_get_all(selected_elements) },
+            ContentType::Snapshots => { Content::result_zfs_get_all(selected_elements) },
         }
+    }
+
+    pub fn help() {
+        let help = format!("{}\n{}\nVersion: {}\nRelease: {}\n{}", crate::NAME, crate::COPYRIGHT, crate::VERSION, crate::RELEASE, crate::HELP);
+        dialog::result_dialog(" Help ", "", help.lines().collect());
     }
 
     pub fn selected_elements(&self) -> Vec<String> {
 
-        if self.selected_elements.len() > 0 {
+        if !self.selected_elements.is_empty() {
             self.selected_elements.to_owned()
         } else {
             vec![self.command_result[self.position as usize].name.to_owned()]
         }
     }
 
-    fn seleted_string(selected_elements: &Vec<String>) -> String {
+    fn seleted_string(selected_elements: &[String]) -> String {
 
         if selected_elements.len() == 1 {
             selected_elements.get(0).unwrap().to_string()
@@ -228,10 +233,10 @@ impl Content {
     fn confirm_pool_scrub(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
-        let title = " Confirm Scrub: ";
+        let title = " Scrub ZPool ";
         let prompt = "The following pools(s) will be scrubbed: ";
 
-        if let Err(_) = dialog::confirm_dialog(title, prompt, selected_string.as_str()) {
+        if dialog::confirm_dialog(title, prompt, selected_string.as_str()).is_err() {
             return;
         }
 
@@ -241,10 +246,10 @@ impl Content {
     fn confirm_snapshot_rollback(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
-        let title = " Confirm Rollback: ";
+        let title = " Snapshot Rollback ";
         let prompt = "The Dataset(s) will be rolled back to the following snapshot(s): ";
 
-        if let Err(_) = dialog::confirm_dialog(title, prompt, selected_string.as_str()) {
+        if dialog::confirm_dialog(title, prompt, selected_string.as_str()).is_err() {
             return;
         }
 
@@ -254,28 +259,30 @@ impl Content {
     fn input_dataset_create(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
+        let dataset = format!("{}/", selected_string);
+        let title = " Create Dataset ";
+        let prompt = "Enter the name of the new Dataset";
 
-        match dialog::input_dialog(" Create Dataset: ", "Enter the name of the new Dataset", selected_string.as_str()) {
-            Ok(dataset_name) => { command::zfs_create(dataset_name); },
-            Err(_)    => { },
+        if let Ok(dataset_name) = dialog::input_dialog(title, prompt, dataset.as_str()) {
+            command::zfs_create(dataset_name);
         }
 
         dialog::refresh_screen();
     }
 
-    fn input_volume_create() {
+    fn input_volume_create(selected_elements: Vec<String>) {
 
+        let selected_string = Content::seleted_string(&selected_elements);
+        let volume = format!("{}/", selected_string);
         let default_size = "1g";
+        let title = " Create Volume ";
+        let prompt = "Enter the name and size of the new Volume";
 
-        match dialog::two_input_dialog(" Create Dataset: ", "Enter the name and size of the new Volume", "", default_size) {
-            Ok(volume) => { 
+        if let Ok(volume) =  dialog::two_input_dialog(title, prompt, volume.as_str(), default_size) {
+            let volume_name = volume.0;
+            let volume_size = volume.1;
 
-                let volume_name = volume.0;
-                let volume_size = volume.1;
-
-                command::volume_create(volume_name, volume_size);
-            },
-            Err(_)    => { },
+            command::volume_create(volume_name, volume_size);
         }
 
         dialog::refresh_screen();
@@ -285,10 +292,11 @@ impl Content {
 
         let selected_string = Content::seleted_string(&selected_elements);
         let snapshot = format!("{}@", selected_string);
+        let title = " Snapshot Dataset ";
+        let prompt = "Enter the name of the new Snapshot";
 
-        match dialog::input_dialog(" Snapshot Dataset: ", "Enter the name of the new Snapshot", snapshot.as_str()) {
-            Ok(dataset_name) => { command::zfs_snapshot(dataset_name); },
-            Err(_)    => { },
+        if let Ok(dataset_name) = dialog::input_dialog(title, prompt, snapshot.as_str()) {
+            command::zfs_snapshot(dataset_name);
         }
 
         dialog::refresh_screen();
@@ -297,38 +305,43 @@ impl Content {
     fn input_snapshot_diff(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
+        let title = " Diff Dataset ";
+        let prompt = "Enter the name of the first and second Snapshots";
 
-        match dialog::two_input_dialog(" Diff Dataset: ", "Enter the name of the first and second Snapshots",
-            selected_string.as_str(), selected_string.as_str()) {
-            Ok(snapshots) => { 
+        if let Ok(snapshots) = dialog::two_input_dialog(title, prompt, selected_string.as_str(), selected_string.as_str()) {
 
-                let snapshot_1 = snapshots.0;
-                let snapshot_2 = snapshots.1;
+            let snapshot_1 = snapshots.0;
+            let snapshot_2 = snapshots.1;
 
-                let output = command::zfs_diff(snapshot_1, snapshot_2);
-                dialog::result_dialog(" Snapshot Diff ", "[ M modified | - removed | + created | R renamed ]", output.lines().collect());
-            },
-            Err(_)    => { },
+            let output = command::zfs_diff(snapshot_1, snapshot_2);
+            dialog::result_dialog(" Snapshot Diff ", "[ M modified | - removed | + created | R renamed ]", output.lines().collect());
         }
 
         dialog::refresh_screen();
     }
 
-    fn result_get_all(selected_elements: Vec<String>) {
+    fn result_zpool_get_all(selected_elements: Vec<String>) {
+
+        let selected_string = Content::seleted_string(&selected_elements);
+        let output = command::zpool_get_all(selected_string);
+        dialog::result_dialog(" ZPool Get All ", "", output.lines().collect());
+    }
+
+    fn result_zfs_get_all(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
         let output = command::zfs_get_all(selected_string);
-        dialog::result_dialog(" Snapshot Diff ", "[ NAME | PROPERTY | VALUE | SOURCE ]", output.lines().collect());
-
+        dialog::result_dialog(" ZFS Get All ", "", output.lines().collect());
     }
 
     fn input_snapshot_clone(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
+        let title = " Snapshot Clone ";
+        let prompt = "Enter the name of the new Snapshot";
 
-        match dialog::input_dialog(" Clone Snapshot: ", "Enter the name of the new Snapshot", "") {
-            Ok(dataset_name) => { command::zfs_clone(selected_string, dataset_name); },
-            Err(_)    => { },
+        if let Ok(dataset_name) = dialog::input_dialog(title, prompt, "") {
+            command::zfs_clone(selected_string, dataset_name);
         }
 
         dialog::refresh_screen();
@@ -337,11 +350,11 @@ impl Content {
     fn input_dataset_rename(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
+        let title = " Rename Dataset ";
+        let prompt = "Enter the new name for the Dataset";
 
-        match dialog::input_dialog(" Rename Dataset: ", "Enter the new name for the Dataset",
-            selected_string.as_str()) {
-            Ok(new_dataset_name) => { command::zfs_rename(selected_string, new_dataset_name); },
-            Err(_)    => { },
+        if let Ok(new_dataset_name) = dialog::input_dialog(title, prompt, selected_string.as_str()) {
+            command::zfs_rename(selected_string, new_dataset_name);
         }
 
         dialog::refresh_screen();

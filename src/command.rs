@@ -7,13 +7,13 @@ pub struct CommandResult {
     pub used: String,   
 }
 
-pub fn list_command(cmd: &str, arguments: &Vec<&str>) -> Vec<CommandResult> {
+pub fn list_command(cmd: &str, arguments: &[&str]) -> Vec<CommandResult> {
 
     let mut command = process::Command::new(cmd);
     let output = command.args(arguments).output().expect("Failure running command: list_command").stdout;
     let command_output = String::from_utf8_lossy(&output).to_string();
 
-    let lines: Vec<&str> = command_output.split("\n").collect();
+    let lines: Vec<&str> = command_output.split('\n').collect();
 
     let mut result = Vec::new();
 
@@ -42,7 +42,7 @@ pub fn list_command(cmd: &str, arguments: &Vec<&str>) -> Vec<CommandResult> {
     result
 }
 
-pub fn run_command(cmd: &str, arguments: &Vec<&str>) -> String {
+pub fn run_command(cmd: &str, arguments: &[&str]) -> String {
 
     let mut command = process::Command::new(cmd);
     let output = command.args(arguments).output().expect("Failure running command: run_command").stdout;
@@ -125,6 +125,12 @@ pub fn zfs_diff(snapshot_1: String, snapshot_2: String) -> String {
 
     let arguments = vec!["diff", snapshot_1.as_str(), snapshot_2.as_str()];
     run_command("zfs", &arguments)
+}
+
+pub fn zpool_get_all(dataset: String) -> String {
+
+    let arguments = vec!["get", "all", dataset.as_str()];
+    run_command("zpool", &arguments)
 }
 
 pub fn zfs_get_all(dataset: String) -> String {

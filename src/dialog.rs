@@ -191,7 +191,7 @@ pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str) -> 
             },
 
             KEY_TAB        => {
-                if is_input1_selected == true {
+                if is_input1_selected {
                     is_input1_selected = false; 
                 } else {
                     is_input1_selected = true;
@@ -264,31 +264,31 @@ pub fn result_dialog(title: &str, prompt: &str, info: Vec<&str>) {
     let start_x = max_x/2 - dialog_width/2;
 
     let footnote = "ENTER Close";
-    let bar = "----------------------------------------------------------------";
+    let bottom_bar = "----------------------------------------------------------------";
 
     let dialog = window(dialog_height, dialog_width, start_y, start_x, title);
     mvwprintw(dialog, 2, 3, prompt);
 
-    let bar_x = dialog_width/2 - bar.len() as i32/2;
-    mvwprintw(dialog, dialog_height-3, bar_x, bar);
+    let bottom_bar_x = dialog_width/2 - bottom_bar.len() as i32/2;
+    mvwprintw(dialog, dialog_height-3, bottom_bar_x, bottom_bar);
     let foot_x = dialog_width/2 - footnote.len() as i32/2;
     mvwprintw(dialog, dialog_height-2, foot_x, footnote);
 
     let mut start_from = 0;
     let height = dialog_height - 6;
-    let width = (dialog_width - 6) as usize;
+    let width = (dialog_width - 15) as usize;
 
     loop {
 
-        if start_from < 0 {
+        if start_from < 0 || info.len() < height as usize {
             start_from = 0;
-        }
-
-        if start_from >= info.len() as i32 - height {
+        } else if start_from >= info.len() as i32 - height {
             start_from = info.len() as i32 - height;
         }
 
         for (i, line) in info.iter().enumerate() {
+
+            // line.replace()
 
             if (i as i32) < start_from { continue }
             if (i as i32) >= height + start_from { break }
@@ -337,7 +337,7 @@ pub fn fit_to_window(result_name: &str, width: usize) -> String {
         name.push_str(" ");
     }
 
-    format!("{}", name)
+    name
 }
 
 // pub fn print_in_position(text: &str, y: i32, x: i32) {

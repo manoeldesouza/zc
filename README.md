@@ -50,13 +50,13 @@ Use LEFT or RIGHT keys to navigate in between the two windows.
 
 |  Key  |       Pool      |    Dataset    |    Snapshot   |     Volume    |
 |:-----:|:---------------:|:-------------:|:-------------:|:-------------:|
-|**F1** |         -       |        -      |        -      |        -      |
-|**F2** |         -       |        -      |   *zfs diff*  |        -      |
-|**F3** |         -       |        -      |        -      |        -      |
-|**F4** |         -       |        -      |        -      |        -      |
-|**F5** |         -       |*zfs snapshot* |  *zfs clone*  |*zfs snapshot* |
-|**F6** |         -       |  *zfs rename* |  *zfs rename* |  *zfs rename* |
-|**F7** |  *zpool scrub*  |  *zfs create* | *zfs rollback*|  *zfs create* |
-|**F8** | *zpool destroy* | *zfs destroy* | *zfs destroy* | *zfs destroy* |
-|**F9** |         -       |        -      |        -      |        -      |
-|**F10**|       Exit      |      Exit     |      Exit     |      Exit     |
+|  F1   |       Help      |      Help     |      Help     |      Help     |
+|  F2   |         -       |        -      |    zfs diff   |        -      |
+|  F3   |         -       |        -      |        -      |        -      |
+|  F4   |         -       |        -      |        -      |        -      |
+|  F5   |         -       |  zfs snapshot |   zfs clone   |  zfs snapshot |
+|  F6   |         -       |   zfs rename  |   zfs rename  |   zfs rename  |
+|  F7   |   zpool scrub   |   zfs create  |  zfs rollback |   zfs create  |
+|  F8   |  zpool destroy  |  zfs destroy  |  zfs destroy  |  zfs destroy  |
+|  F9   |         -       |  zfs get all  |  zfs get all  |  zfs get all  |
+|  F10  |       Exit      |      Exit     |      Exit     |      Exit     |
