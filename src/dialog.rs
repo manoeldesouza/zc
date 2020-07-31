@@ -314,6 +314,74 @@ pub fn result_dialog(title: &str, prompt: &str, info: Vec<&str>) {
     }
 }
 
+pub fn navigation_dialog(title: &str, prompt: &str, info: Vec<&str>) -> Result<String,()> {
+
+    let (max_y, max_x) = screen_dimensions();
+
+    let dialog_height = max_y - 6;
+    let dialog_width = max_x - 6;
+
+    let start_y = max_y/2 - dialog_height/2;
+    let start_x = max_x/2 - dialog_width/2;
+
+    let footnote = "ESC Cancel     ENTER Select";
+    let bottom_bar = "----------------------------------------------------------------";
+
+    let dialog = window(dialog_height, dialog_width, start_y, start_x, title);
+    mvwprintw(dialog, 2, 3, prompt);
+
+    let bottom_bar_x = dialog_width/2 - bottom_bar.len() as i32/2;
+    mvwprintw(dialog, dialog_height-3, bottom_bar_x, bottom_bar);
+    let foot_x = dialog_width/2 - footnote.len() as i32/2;
+    mvwprintw(dialog, dialog_height-2, foot_x, footnote);
+
+    let mut start_from = 0;
+    let mut position = 0;
+    let height = dialog_height - 7;
+    let width = (dialog_width - 15) as usize;
+
+    loop {
+
+        if position >= info.len() as i32 - 1 {
+            position = info.len() as i32 - 1;
+        }
+
+        start_from = scroll(position, start_from, height+1);
+
+        for (i, line) in info.iter().enumerate() {
+
+            if (i as i32) < start_from { continue }
+            if (i as i32) >= height + start_from { break }
+            if (i as i32) == position { wattron(dialog, A_REVERSE()); }
+
+            let text = fit_to_window(line, width);
+
+            mvwprintw(dialog, 3+(i as i32)-start_from, 3, text.as_str());
+            wattroff(dialog, A_REVERSE());
+        }   
+
+        wrefresh(dialog);
+
+        let key = getch();
+
+        if key == KEY_ESC || key == KEY_F10 {
+            return Err(())
+        } else if key == KEY_UP {
+            position -= 1;
+        } else if key == KEY_DOWN {
+            position += 1;
+        } else if key == KEY_PPAGE {
+            position -= 10;
+        } else if key == KEY_NPAGE {
+            position += 10;
+        } else if key == KEY_ENTER {
+            let result = info.get(position as usize).unwrap();
+            return Ok(result.to_string());
+
+        }
+    }
+}
+
 pub fn bottom_menu(text: &str) {
 
     let (max_y, _max_x) = screen_dimensions();

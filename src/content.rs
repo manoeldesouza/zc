@@ -91,7 +91,7 @@ impl Content {
 
             if (i as i32) < self.start_from { continue }
             if (i as i32) >= height + self.start_from { break }
-            if (i as i32) == self.position  && self.is_selected { wattron(window, A_REVERSE()); }
+            if (i as i32) == self.position && self.is_selected { wattron(window, A_REVERSE()); }
 
             let text = dialog::fit_to_window(result_line.name.as_str(), width as usize);
 
@@ -216,7 +216,9 @@ impl Content {
     }
 
     pub fn help() {
-        let help = format!("{}\n{}\nVersion: {}\nRelease: {}\n{}", crate::NAME, crate::COPYRIGHT, crate::VERSION, crate::RELEASE, crate::HELP);
+        let help = format!("{}\n{}\nVersion: {}\nRelease: {}\n\n\nUSAGE:\n{}\n\n\nLICENSE:\n{}", 
+            crate::NAME, crate::COPYRIGHT, crate::VERSION, crate::RELEASE, crate::HELP, crate::LICENSE
+        );
         dialog::result_dialog(" Help ", "", help.lines().collect());
     }
 
@@ -336,8 +338,15 @@ impl Content {
         let title = " ZPOOL Get All ";
         let prompt = output.lines().collect::<Vec<&str>>().get(0).unwrap().to_owned();
 
-        dialog::result_dialog(title, prompt, filtered_output);
-    }
+        if let Ok(line) = dialog::navigation_dialog(title, prompt, filtered_output) {
+            let columns: Vec<&str> = line.split_whitespace().collect();
+
+            let selected_dataset  = columns.get(0).unwrap().to_owned();
+            let selected_property = columns.get(1).unwrap().to_owned();
+            let selected_value    = columns.get(2).unwrap().to_owned();
+    
+            Content::input_zpool_set(selected_dataset.to_string(), selected_property.to_string(), selected_value.to_string());    
+        }    }
 
     fn result_zfs_get_all(selected_elements: Vec<String>) {
 
@@ -347,7 +356,39 @@ impl Content {
         let title = " ZFS Get All ";
         let prompt = output.lines().collect::<Vec<&str>>().get(0).unwrap().to_owned();
 
-        dialog::result_dialog(title, prompt, filtered_output);
+        if let Ok(line) = dialog::navigation_dialog(title, prompt, filtered_output) {
+            let columns: Vec<&str> = line.split_whitespace().collect();
+
+            let selected_dataset  = columns.get(0).unwrap().to_owned();
+            let selected_property = columns.get(1).unwrap().to_owned();
+            let selected_value    = columns.get(2).unwrap().to_owned();
+    
+            Content::input_zfs_set(selected_dataset.to_string(), selected_property.to_string(), selected_value.to_string());    
+        }
+    }
+
+    fn input_zpool_set(selected_dataset: String, selected_property: String, selected_value: String) {
+
+        let title = " Set Property ";
+        let prompt = format!("Change Property {} from {} to: ", selected_property, selected_value);
+
+        if let Ok(property_value) = dialog::input_dialog(title, prompt.as_str(), "") {
+            command::zpool_set(selected_dataset, selected_property, property_value);
+        }
+
+        dialog::refresh_screen();
+    }
+
+    fn input_zfs_set(selected_dataset: String, selected_property: String, selected_value: String) {
+
+        let title = " Set Property ";
+        let prompt = format!("Change Property {} from {} to: ", selected_property, selected_value);
+
+        if let Ok(property_value) = dialog::input_dialog(title, prompt.as_str(), "") {
+            command::zfs_set(selected_dataset, selected_property, property_value);
+        }
+
+        dialog::refresh_screen();
     }
 
     fn input_snapshot_clone(selected_elements: Vec<String>) {

@@ -128,6 +128,22 @@ pub fn zfs_diff(snapshot_1: String, snapshot_2: String) -> String {
     run_command("zfs", &arguments)
 }
 
+pub fn zpool_set(dataset: String, property: String, value: String) -> String {
+
+    let property_value = format!("{}={}", property, value);
+
+    let arguments = vec!["set", property_value.as_str(), dataset.as_str()];
+    run_command("zfs", &arguments)
+}
+
+pub fn zfs_set(dataset: String, property: String, value: String) -> String {
+
+    let property_value = format!("{}={}", property, value);
+
+    let arguments = vec!["set", property_value.as_str(), dataset.as_str()];
+    run_command("zfs", &arguments)
+}
+
 pub fn zfs_send(snapshot_source: String, snapshot_stream: String) -> Result<(),> {
 
     let send_arguments = vec!["send", snapshot_source.as_str()];
