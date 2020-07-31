@@ -332,14 +332,22 @@ impl Content {
 
         let selected_string = Content::seleted_string(&selected_elements);
         let output = command::zpool_get_all(selected_string);
-        dialog::result_dialog(" ZPool Get All ", "", output.lines().collect());
+        let filtered_output: Vec<&str> = output.lines().collect::<Vec<&str>>().get(1..).unwrap().to_vec();
+        let title = " ZPOOL Get All ";
+        let prompt = "[ NAME | PROPERTY | VALUE | SOURCE ]";
+
+        dialog::result_dialog(title, prompt, filtered_output);
     }
 
     fn result_zfs_get_all(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
         let output = command::zfs_get_all(selected_string);
-        dialog::result_dialog(" ZFS Get All ", "", output.lines().collect());
+        let filtered_output: Vec<&str> = output.lines().collect::<Vec<&str>>().get(1..).unwrap().to_vec();
+        let title = " ZFS Get All ";
+        let prompt = "[ NAME | PROPERTY | VALUE | SOURCE ]";
+
+        dialog::result_dialog(title, prompt, filtered_output);
     }
 
     fn input_snapshot_clone(selected_elements: Vec<String>) {
