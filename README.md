@@ -53,7 +53,7 @@ Use LEFT or RIGHT keys to navigate in between the two windows.
 |:-----:|:---------------:|:-------------:|:-------------:|:-------------:|
 |  F1   |       Help      |      Help     |      Help     |      Help     |
 |  F2   |         -       |        -      |    zfs diff   |        -      |
-|  F3   |         -       |        -      |        -      |        -      |
+|  F3   |         -       |        -      |    zfs send   |        -      |
 |  F4   |         -       |        -      |        -      |        -      |
 |  F5   |         -       |  zfs snapshot |   zfs clone   |  zfs snapshot |
 |  F6   |         -       |   zfs rename  |   zfs rename  |   zfs rename  |

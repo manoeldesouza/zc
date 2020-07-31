@@ -334,7 +334,7 @@ impl Content {
         let output = command::zpool_get_all(selected_string);
         let filtered_output: Vec<&str> = output.lines().collect::<Vec<&str>>().get(1..).unwrap().to_vec();
         let title = " ZPOOL Get All ";
-        let prompt = "[ NAME | PROPERTY | VALUE | SOURCE ]";
+        let prompt = output.lines().collect::<Vec<&str>>().get(0).unwrap().to_owned();
 
         dialog::result_dialog(title, prompt, filtered_output);
     }
@@ -345,7 +345,7 @@ impl Content {
         let output = command::zfs_get_all(selected_string);
         let filtered_output: Vec<&str> = output.lines().collect::<Vec<&str>>().get(1..).unwrap().to_vec();
         let title = " ZFS Get All ";
-        let prompt = "[ NAME | PROPERTY | VALUE | SOURCE ]";
+        let prompt = output.lines().collect::<Vec<&str>>().get(0).unwrap().to_owned();
 
         dialog::result_dialog(title, prompt, filtered_output);
     }
@@ -380,14 +380,14 @@ impl Content {
 
         let selected_string = Content::seleted_string(&selected_elements);
         let title = " Send Snapshot ";
-        let prompt = "Enter the stream to send the snapshot (Use with caution!)";
+        let prompt = "Enter the stream command to send the snapshot";
 
         if let Ok(snapshots) = dialog::two_input_dialog(title, prompt, selected_string.as_str(), "zfs recv pool/dataset") {
 
             let snapshot_source = snapshots.0;
             let snapshot_stream = snapshots.1;
 
-            command::zfs_send(snapshot_source, snapshot_stream);
+            let _ = command::zfs_send(snapshot_source, snapshot_stream);
         }
 
         dialog::refresh_screen();

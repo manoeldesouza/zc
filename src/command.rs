@@ -128,15 +128,15 @@ pub fn zfs_diff(snapshot_1: String, snapshot_2: String) -> String {
     run_command("zfs", &arguments)
 }
 
-pub fn zfs_send(snapshot_source: String, snapshot_stream: String) {
+pub fn zfs_send(snapshot_source: String, snapshot_stream: String) -> Result<(),> {
 
     let send_arguments = vec!["send", snapshot_source.as_str()];
 
     let mut send_command = process::Command::new("zfs")
         .args(send_arguments)
         .stdout(process::Stdio::piped())
-        .spawn()
-        .unwrap();
+        .spawn() ?;
+        // .unwrap();
 
     let stream_cmd: Vec<&str> = snapshot_stream.split_whitespace().collect();
     let stream_arguments = stream_cmd.get(1..).unwrap();
@@ -145,16 +145,22 @@ pub fn zfs_send(snapshot_source: String, snapshot_stream: String) {
         .args(stream_arguments)
         .stdin(process::Stdio::piped())
         .stdout(process::Stdio::piped())
-        .spawn()
-        .unwrap();
+        .spawn() ?;
+        // .unwrap();
 
     if let Some(ref mut stdout) = send_command.stdout {
         if let Some(ref mut stdin) = recv_command.stdin {
             let mut buf: Vec<u8> = Vec::new();
-            stdout.read_to_end(&mut buf).unwrap();
-            stdin.write_all(&buf).unwrap();
+            // stdout.read_to_end(&mut buf).unwrap();
+            // stdin.write_all(&buf).unwrap();
+            stdout.read_to_end(&mut buf) ?;
+            stdin.write_all(&buf) ?;
         }
     }
+
+    let _ = recv_command.wait_with_output().unwrap().stdout;
+
+    Ok(())
 }
 
 pub fn zpool_get_all(dataset: String) -> String {

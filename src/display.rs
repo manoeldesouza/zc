@@ -150,10 +150,10 @@ impl Screen {
 
     fn draw_menu(&mut self) {
 
-        let pools_menu     = " 1 Help  2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Destr 9 GetAl 10 Exit ".to_string();
-        let datasets_menu  = " 1 Help  2 _____ 3 _____ 4 _____ 5 Snaps 6 Renam 7 Creat 8 Destr 9 GetAl 10 Exit ".to_string();
-        let volumes_menu   = " 1 Help  2 _____ 3 _____ 4 _____ 5 Snaps 6 Renam 7 Creat 8 Destr 9 GetAl 10 Exit ".to_string();
-        let snapshots_menu = " 1 Help  2 Diff  3 Send  4 _____ 5 Clone 6 Renam 7 RollB 8 Destr 9 GetAl 10 Exit ".to_string();
+        let pools_menu     = " 1 Help 2 _____ 3 _____ 4 _____ 5 _____ 6 _____ 7 Scrub 8 Destroy 9 GetAll 10 Exit ".to_string();
+        let datasets_menu  = " 1 Help 2 _____ 3 _____ 4 _____ 5 Snapshot 6 Rename 7 Create 8 Destroy 9 GetAll 10 Exit ".to_string();
+        let volumes_menu   = " 1 Help 2 _____ 3 _____ 4 _____ 5 Snapshot 6 Rename 7 Create 8 Destroy 9 GetAll 10 Exit ".to_string();
+        let snapshots_menu = " 1 Help 2 Diff 3 Send 4 _____ 5 Clone 6 Rename 7 RollBack 8 Destroy 9 GetAll 10 Exit ".to_string();
 
         let mut selected_menu: String;
 

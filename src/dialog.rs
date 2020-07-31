@@ -288,8 +288,6 @@ pub fn result_dialog(title: &str, prompt: &str, info: Vec<&str>) {
 
         for (i, line) in info.iter().enumerate() {
 
-            // line.replace()
-
             if (i as i32) < start_from { continue }
             if (i as i32) >= height + start_from { break }
 
