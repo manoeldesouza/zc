@@ -132,7 +132,15 @@ impl Content {
     }
 
     pub fn key_f3(&mut self) {
-        // TODO
+
+        let selected_elements = self.selected_elements();
+
+        match self.c_type {
+            ContentType::Pools =>     { },
+            ContentType::Datasets =>  { },
+            ContentType::Volumes =>   { },
+            ContentType::Snapshots => { Content::input_snapshot_send(selected_elements); },
+        };
     }
 
     pub fn key_f4(&mut self) {
@@ -337,7 +345,7 @@ impl Content {
     fn input_snapshot_clone(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
-        let title = " Snapshot Clone ";
+        let title = " Clone Snapshot ";
         let prompt = "Enter the name of the new Snapshot";
 
         if let Ok(dataset_name) = dialog::input_dialog(title, prompt, "") {
@@ -355,6 +363,23 @@ impl Content {
 
         if let Ok(new_dataset_name) = dialog::input_dialog(title, prompt, selected_string.as_str()) {
             command::zfs_rename(selected_string, new_dataset_name);
+        }
+
+        dialog::refresh_screen();
+    }
+
+    fn input_snapshot_send(selected_elements: Vec<String>) {
+
+        let selected_string = Content::seleted_string(&selected_elements);
+        let title = " Send Snapshot ";
+        let prompt = "Enter the stream to send the snapshot (Use with caution!)";
+
+        if let Ok(snapshots) = dialog::two_input_dialog(title, prompt, selected_string.as_str(), "zfs recv pool/dataset") {
+
+            let snapshot_source = snapshots.0;
+            let snapshot_stream = snapshots.1;
+
+            command::zfs_send(snapshot_source, snapshot_stream);
         }
 
         dialog::refresh_screen();

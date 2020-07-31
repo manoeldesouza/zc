@@ -9,7 +9,7 @@ mod content;
 
 const NAME: &str = "zc - ZFS Commander";
 const COPYRIGHT: &str = "Copyright (c) 2020, Manoel de Souza <manoel.desouza@outlook.com.br>";
-const VERSION: &str = "0.9.3";
+const VERSION: &str = "0.9.4";
 const RELEASE: &str = "30-Jul-2020";
 
 const HELP: &str = r#"
@@ -25,7 +25,7 @@ const HELP: &str = r#"
 |:-----:|:---------------:|:-------------:|:-------------:|:-------------:|
 |  F1   |       Help      |      Help     |      Help     |      Help     |
 |  F2   |         -       |        -      |    zfs diff   |        -      |
-|  F3   |         -       |        -      |        -      |        -      |
+|  F3   |         -       |        -      |    zfs send   |        -      |
 |  F4   |         -       |        -      |        -      |        -      |
 |  F5   |         -       |  zfs snapshot |   zfs clone   |  zfs snapshot |
 |  F6   |         -       |   zfs rename  |   zfs rename  |   zfs rename  |

@@ -46,6 +46,7 @@ Use TAB key to switch between the modes available.
 
 Use LEFT or RIGHT keys to navigate in between the two windows.
 
+
 **Function Keys per Mode**
 
 |  Key  |       Pool      |    Dataset    |    Snapshot   |     Volume    |

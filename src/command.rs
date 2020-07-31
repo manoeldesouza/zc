@@ -1,4 +1,5 @@
 
+use std::io::*;
 use std::process;
 
 pub struct CommandResult {
@@ -125,6 +126,35 @@ pub fn zfs_diff(snapshot_1: String, snapshot_2: String) -> String {
 
     let arguments = vec!["diff", snapshot_1.as_str(), snapshot_2.as_str()];
     run_command("zfs", &arguments)
+}
+
+pub fn zfs_send(snapshot_source: String, snapshot_stream: String) {
+
+    let send_arguments = vec!["send", snapshot_source.as_str()];
+
+    let mut send_command = process::Command::new("zfs")
+        .args(send_arguments)
+        .stdout(process::Stdio::piped())
+        .spawn()
+        .unwrap();
+
+    let stream_cmd: Vec<&str> = snapshot_stream.split_whitespace().collect();
+    let stream_arguments = stream_cmd.get(1..).unwrap();
+
+    let mut recv_command = process::Command::new(stream_cmd.get(0).unwrap())
+        .args(stream_arguments)
+        .stdin(process::Stdio::piped())
+        .stdout(process::Stdio::piped())
+        .spawn()
+        .unwrap();
+
+    if let Some(ref mut stdout) = send_command.stdout {
+        if let Some(ref mut stdin) = recv_command.stdin {
+            let mut buf: Vec<u8> = Vec::new();
+            stdout.read_to_end(&mut buf).unwrap();
+            stdin.write_all(&buf).unwrap();
+        }
+    }
 }
 
 pub fn zpool_get_all(dataset: String) -> String {
