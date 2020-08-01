@@ -62,8 +62,8 @@ pub fn scroll(position: i32, mut start_from: i32, height: i32) -> i32 {
         start_from = position;
     } 
     
-    if position >= start_from + height-1 {
-        start_from = position - height+2;
+    if position >= start_from + height - 1 {
+        start_from = position - height + 2;
     }
 
     start_from
@@ -80,15 +80,15 @@ pub fn window(height: i32, width: i32, start_y: i32, start_x: i32, title: &str) 
     win
 }
 
-pub fn input_dialog(title: &str, prompt: &str, info: &str) -> Result<String,()> {
+pub fn input_dialog(title: &str, prompt: &str, info: &str) -> Result<String, ()> {
 
     let dialog_height = 8;
     let dialog_width = 70;
 
     let (max_y, max_x) = screen_dimensions();
 
-    let start_y = max_y/2 - dialog_height/2;
-    let start_x = max_x/2 - dialog_width/2;
+    let start_y = max_y / 2 - dialog_height / 2;
+    let start_x = max_x / 2 - dialog_width / 2;
 
     let footnote = "ESC Cancel     ENTER Confirm";
 
@@ -96,12 +96,18 @@ pub fn input_dialog(title: &str, prompt: &str, info: &str) -> Result<String,()> 
     mvwprintw(dialog, 2, 3, prompt);
     wattroff(dialog, A_REVERSE());
 
-    mvwprintw(dialog, 5, 3, "----------------------------------------------------------------");
-    let foot_x = dialog_width/2 - footnote.len() as i32/2;
+    mvwprintw(
+        dialog, 5, 3, 
+        "----------------------------------------------------------------"
+    );
+    let foot_x = dialog_width / 2 - footnote.len() as i32 / 2;
     mvwprintw(dialog, 6, foot_x, footnote);
 
     wattron(dialog, A_REVERSE());
-    mvwprintw(dialog, 3, 3, "                                                                ");
+    mvwprintw(
+        dialog, 3, 3, 
+        "                                                                "
+    );
     mvwprintw(dialog, 3, 3, info);
 
     wrefresh(dialog);
@@ -130,15 +136,16 @@ pub fn input_dialog(title: &str, prompt: &str, info: &str) -> Result<String,()> 
     }
 }
 
-pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str) -> Result<(String, String),()> {
+pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str
+) -> Result<(String, String), ()> {
 
     let dialog_height = 10;
     let dialog_width = 70;
 
     let (max_y, max_x) = screen_dimensions();
 
-    let start_y = max_y/2 - dialog_height/2;
-    let start_x = max_x/2 - dialog_width/2;
+    let start_y = max_y / 2 - dialog_height / 2;
+    let start_x = max_x / 2 - dialog_width / 2;
 
     let footnote = "ESC Cancel     ENTER Confirm";
 
@@ -146,16 +153,25 @@ pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str) -> 
     mvwprintw(dialog, 2, 3, prompt);
     wattroff(dialog, A_REVERSE());
 
-    mvwprintw(dialog, 7, 3, "----------------------------------------------------------------");
+    mvwprintw(
+        dialog, 7, 3, 
+        "----------------------------------------------------------------"
+    );
     let foot_x = dialog_width/2 - footnote.len() as i32/2;
     mvwprintw(dialog, 8, foot_x, footnote);
 
     wattron(dialog, A_REVERSE());
-    mvwprintw(dialog, 3, 3, "                                                                ");
+    mvwprintw(
+        dialog, 3, 3, 
+        "                                                                "
+    );
     mvwprintw(dialog, 3, 3, info1);
 
     wattron(dialog, A_REVERSE());
-    mvwprintw(dialog, 5, 3, "                                                                ");
+    mvwprintw(
+        dialog, 5, 3, 
+        "                                                                "
+    );
     mvwprintw(dialog, 5, 3, info2);
 
     wrefresh(dialog);

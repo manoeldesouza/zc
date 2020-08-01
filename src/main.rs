@@ -8,9 +8,8 @@ mod content;
 
 const NAME: &str = "zc - ZFS Commander";
 const COPYRIGHT: &str = "Copyright (c) 2020, Manoel de Souza <manoel.desouza@outlook.com.br>";
-const VERSION: &str = "0.9.6";
+const VERSION: &str = "0.9.7";
 const RELEASE: &str = "31-Jul-2020";
-
 const HELP: &str = r#"
     Navigation Keys:
 

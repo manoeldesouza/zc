@@ -60,7 +60,7 @@ impl Content {
         if position < 0 || self.command_result.is_empty() {
             self.position = 0   
 
-        } else if position as usize >= self.command_result.len()-2 {
+        } else if position as usize >= self.command_result.len() - 2 {
             self.jump_to_last();
 
         } else {
@@ -89,12 +89,11 @@ impl Content {
     
         for (i, result_line) in self.command_result.iter().enumerate() {
 
-            if (i as i32) < self.start_from { continue }
+            if (i as i32) <  self.start_from { continue }
             if (i as i32) >= height + self.start_from { break }
             if (i as i32) == self.position && self.is_selected { wattron(window, A_REVERSE()); }
 
             let text = dialog::fit_to_window(result_line.name.as_str(), width as usize);
-
             let content_position = i as i32 - self.start_from + TOP_CONTENT_Y;
 
             mvwprintw(window, content_position, TOP_CONTENT_X, text.as_str());
@@ -125,7 +124,7 @@ impl Content {
 
         match self.c_type {
             ContentType::Pools =>     { },
-            ContentType::Datasets =>  { },
+            ContentType::Datasets =>  { Content::confirm_dataset_promote(selected_elements); },
             ContentType::Volumes =>   { },
             ContentType::Snapshots => { Content::input_snapshot_diff(selected_elements); },
         }
@@ -217,7 +216,12 @@ impl Content {
 
     pub fn help() {
         let help = format!("{}\n{}\nVersion: {}\nRelease: {}\n\n\nUSAGE:\n{}\n\n\nLICENSE:\n{}", 
-            crate::NAME, crate::COPYRIGHT, crate::VERSION, crate::RELEASE, crate::HELP, crate::LICENSE
+            crate::NAME, 
+            crate::COPYRIGHT, 
+            crate::VERSION, 
+            crate::RELEASE, 
+            crate::HELP, 
+            crate::LICENSE
         );
         dialog::result_dialog(" Help ", "", help.lines().collect());
     }
@@ -280,6 +284,19 @@ impl Content {
         dialog::refresh_screen();
     }
 
+    fn confirm_dataset_promote(selected_elements: Vec<String>) {
+
+        let selected_string = Content::seleted_string(&selected_elements);
+        let title = " Promote Clone Dataset ";
+        let prompt = "The following Dataset will be promoted: ";
+
+        if dialog::confirm_dialog(title, prompt, selected_string.as_str()).is_err() {
+            return;
+        }
+
+        command::zfs_promote(selected_elements);
+    }
+
     fn input_volume_create(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
@@ -288,7 +305,7 @@ impl Content {
         let title = " Create Volume ";
         let prompt = "Enter the name and size of the new Volume";
 
-        if let Ok(volume) =  dialog::two_input_dialog(title, prompt, volume.as_str(), default_size) {
+        if let Ok(volume) = dialog::two_input_dialog(title, prompt, volume.as_str(), default_size) {
             let volume_name = volume.0;
             let volume_size = volume.1;
 
@@ -305,7 +322,11 @@ impl Content {
         let title = " Snapshot Dataset ";
         let prompt = "Enter the name of the new Snapshot";
 
-        if let Ok(dataset_name) = dialog::input_dialog(title, prompt, snapshot.as_str()) {
+        if let Ok(dataset_name) = dialog::input_dialog(
+            title, 
+            prompt, 
+            snapshot.as_str()
+        ) {
             command::zfs_snapshot(dataset_name);
         }
 
@@ -318,13 +339,22 @@ impl Content {
         let title = " Diff Dataset ";
         let prompt = "Enter the name of the first and second Snapshots";
 
-        if let Ok(snapshots) = dialog::two_input_dialog(title, prompt, selected_string.as_str(), selected_string.as_str()) {
+        if let Ok(snapshots) = dialog::two_input_dialog(
+            title, 
+            prompt, 
+            selected_string.as_str(), 
+            selected_string.as_str()
+        ) {
 
             let snapshot_1 = snapshots.0;
             let snapshot_2 = snapshots.1;
 
             let output = command::zfs_diff(snapshot_1, snapshot_2);
-            dialog::result_dialog(" Snapshot Diff ", "[ M modified | - removed | + created | R renamed ]", output.lines().collect());
+            dialog::result_dialog(
+                " Snapshot Diff ", 
+                "[ M modified | - removed | + created | R renamed ]", 
+                output.lines().collect()
+            );
         }
 
         dialog::refresh_screen();
@@ -334,9 +364,19 @@ impl Content {
 
         let selected_string = Content::seleted_string(&selected_elements);
         let output = command::zpool_get_all(selected_string);
-        let filtered_output: Vec<&str> = output.lines().collect::<Vec<&str>>().get(1..).unwrap().to_vec();
+        let filtered_output: Vec<&str> = output
+            .lines()
+            .collect::<Vec<&str>>()
+            .get(1..)
+            .unwrap()
+            .to_vec();
         let title = " ZPOOL Get All ";
-        let prompt = output.lines().collect::<Vec<&str>>().get(0).unwrap().to_owned();
+        let prompt = output
+            .lines()
+            .collect::<Vec<&str>>()
+            .get(0)
+            .unwrap()
+            .to_owned();
 
         if let Ok(line) = dialog::navigation_dialog(title, prompt, filtered_output) {
             let columns: Vec<&str> = line.split_whitespace().collect();
@@ -345,16 +385,31 @@ impl Content {
             let selected_property = columns.get(1).unwrap().to_owned();
             let selected_value    = columns.get(2).unwrap().to_owned();
     
-            Content::input_zpool_set(selected_dataset.to_string(), selected_property.to_string(), selected_value.to_string());    
-        }    }
+            Content::input_zpool_set(
+                selected_dataset.to_string(),
+                selected_property.to_string(),
+                selected_value.to_string()
+            );    
+        }
+    }
 
     fn result_zfs_get_all(selected_elements: Vec<String>) {
 
         let selected_string = Content::seleted_string(&selected_elements);
         let output = command::zfs_get_all(selected_string);
-        let filtered_output: Vec<&str> = output.lines().collect::<Vec<&str>>().get(1..).unwrap().to_vec();
+        let filtered_output: Vec<&str> = output
+            .lines()
+            .collect::<Vec<&str>>()
+            .get(1..)
+            .unwrap()
+            .to_vec();
         let title = " ZFS Get All ";
-        let prompt = output.lines().collect::<Vec<&str>>().get(0).unwrap().to_owned();
+        let prompt = output
+            .lines()
+            .collect::<Vec<&str>>()
+            .get(0)
+            .unwrap()
+            .to_owned();
 
         if let Ok(line) = dialog::navigation_dialog(title, prompt, filtered_output) {
             let columns: Vec<&str> = line.split_whitespace().collect();
@@ -363,7 +418,11 @@ impl Content {
             let selected_property = columns.get(1).unwrap().to_owned();
             let selected_value    = columns.get(2).unwrap().to_owned();
     
-            Content::input_zfs_set(selected_dataset.to_string(), selected_property.to_string(), selected_value.to_string());    
+            Content::input_zfs_set(
+                selected_dataset.to_string(), 
+                selected_property.to_string(), 
+                selected_value.to_string()
+            );    
         }
     }
 
@@ -373,7 +432,11 @@ impl Content {
         let prompt = format!("Change Property {} from {} to: ", selected_property, selected_value);
 
         if let Ok(property_value) = dialog::input_dialog(title, prompt.as_str(), "") {
-            command::zpool_set(selected_dataset, selected_property, property_value);
+            command::zpool_set(
+                selected_dataset, 
+                selected_property, 
+                property_value
+            );
         }
 
         dialog::refresh_screen();
@@ -382,7 +445,10 @@ impl Content {
     fn input_zfs_set(selected_dataset: String, selected_property: String, selected_value: String) {
 
         let title = " Set Property ";
-        let prompt = format!("Change Property {} from {} to: ", selected_property, selected_value);
+        let prompt = format!(
+            "Change Property {} from {} to: ", 
+            selected_property, selected_value
+        );
 
         if let Ok(property_value) = dialog::input_dialog(title, prompt.as_str(), "") {
             command::zfs_set(selected_dataset, selected_property, property_value);
@@ -423,7 +489,12 @@ impl Content {
         let title = " Send Snapshot ";
         let prompt = "Enter the stream command to send the snapshot";
 
-        if let Ok(snapshots) = dialog::two_input_dialog(title, prompt, selected_string.as_str(), "zfs recv pool/dataset") {
+        if let Ok(snapshots) = dialog::two_input_dialog(
+            title, 
+            prompt, 
+            selected_string.as_str(), 
+            "zfs recv pool/dataset"
+        ) {
 
             let snapshot_source = snapshots.0;
             let snapshot_stream = snapshots.1;
