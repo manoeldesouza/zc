@@ -8,8 +8,8 @@ An ZFS administration tool inspired on Midnight commander
 ZFS Commander is a simple front-end for the most commonly used zpool & zfs commands. While the tool is a work-in-progress, 
 several functions are already working. See the list of functions implemented in Usage section.
 
-The tool is composed of 2 windows, each showing different ZFS related information. The tool will start with Datasets at left
-and Snapshots at the right window. By pressing TAB, each window will cycle through the different modes: Pools, Datasets, 
+The tool is composed of 2 panes, each showing different ZFS related information. The tool will start with Datasets at left
+and Snapshots at the right pane. By pressing TAB, each window will cycle through the different modes: Pools, Datasets, 
 Volumes and Snapshots.
 
 ![ZFS Commander](https://github.com/manoeldesouza/zc/blob/master/screenshots/zc-draft-01.png)
@@ -52,7 +52,7 @@ Use LEFT or RIGHT keys to navigate in between the two windows.
 |  Key  |       Pool      |    Dataset    |    Snapshot   |     Volume    |
 |:-----:|:---------------:|:-------------:|:-------------:|:-------------:|
 |  F1   |       Help      |      Help     |      Help     |      Help     |
-|  F2   |         -       |        -      |    zfs diff   |        -      |
+|  F2   |         -       |  zfs promote  |    zfs diff   |        -      |
 |  F3   |         -       |        -      |    zfs send   |        -      |
 |  F4   |         -       |        -      |        -      |        -      |
 |  F5   |         -       |  zfs snapshot |   zfs clone   |  zfs snapshot |
@@ -61,3 +61,6 @@ Use LEFT or RIGHT keys to navigate in between the two windows.
 |  F8   |  zpool destroy  |  zfs destroy  |  zfs destroy  |  zfs destroy  |
 |  F9   |  zpool get all  |  zfs get all  |  zfs get all  |  zfs get all  |
 |  F10  |       Exit      |      Exit     |      Exit     |      Exit     |
+
+
+NOTE: F9 Get All window enables individual properties to be directly edited.

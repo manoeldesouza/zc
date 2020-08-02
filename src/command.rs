@@ -63,13 +63,13 @@ pub fn list_pools() -> Vec<CommandResult> {
     list_command("zpool", &arguments)
 }
 
-pub fn list_dataset() -> Vec<CommandResult> {
-    let arguments = vec!["list", "-H", "-o", "name,used", "-t", "filesystem"];
+pub fn list_volumes() -> Vec<CommandResult> {
+    let arguments = vec!["list", "-H", "-o", "name,used", "-t", "volume"];
     list_command("zfs", &arguments)
 }
 
-pub fn list_volumes() -> Vec<CommandResult> {
-    let arguments = vec!["list", "-H", "-o", "name,used", "-t", "volume"];
+pub fn list_dataset() -> Vec<CommandResult> {
+    let arguments = vec!["list", "-H", "-o", "name,used", "-t", "filesystem"];
     list_command("zfs", &arguments)
 }
 
@@ -78,18 +78,9 @@ pub fn list_snapshots() -> Vec<CommandResult> {
     list_command("zfs", &arguments)
 }
 
+
 pub fn volume_create(volume_name: String, volume_size: String) {
     let arguments = vec!["create", "-V", volume_size.as_str(), volume_name.as_str()];
-    run_command("zfs", &arguments);
-}
-
-pub fn zfs_create(dataset_name: String) {
-    let arguments = vec!["create", dataset_name.as_str()];
-    run_command("zfs", &arguments);
-}
-
-pub fn zfs_rename(old_dataset_name: String, new_dataset_name: String) {
-    let arguments = vec!["rename", old_dataset_name.as_str(), new_dataset_name.as_str()];
     run_command("zfs", &arguments);
 }
 
@@ -98,16 +89,9 @@ pub fn zfs_clone(snapshot_name: String, new_dataset_name: String) {
     run_command("zfs", &arguments);
 }
 
-pub fn zfs_snapshot(snapshot_name: String) {
-    let arguments = vec!["snapshot", snapshot_name.as_str()];
+pub fn zfs_create(dataset_name: String) {
+    let arguments = vec!["create", dataset_name.as_str()];
     run_command("zfs", &arguments);
-}
-
-pub fn zfs_promote(selected_elements: Vec<String>) {
-    for element in selected_elements {
-        let arguments = vec!["promote", element.as_str()];
-        run_command("zfs", &arguments);
-    }
 }
 
 pub fn zfs_destroy(selected_elements: Vec<String>) {
@@ -122,16 +106,31 @@ pub fn zfs_diff(snapshot_1: String, snapshot_2: String) -> String {
     run_command("zfs", &arguments)
 }
 
-pub fn zpool_set(dataset: String, property: String, value: String) -> String {
-    let property_value = format!("{}={}", property, value);
-    let arguments = vec!["set", property_value.as_str(), dataset.as_str()];
+pub fn zfs_get_all(dataset: String) -> String {
+
+    let arguments = vec!["get", "all", dataset.as_str()];
     run_command("zfs", &arguments)
 }
 
-pub fn zfs_set(dataset: String, property: String, value: String) -> String {
-    let property_value = format!("{}={}", property, value);
-    let arguments = vec!["set", property_value.as_str(), dataset.as_str()];
-    run_command("zfs", &arguments)
+pub fn zfs_promote(selected_elements: Vec<String>) {
+    for element in selected_elements {
+        let arguments = vec!["promote", element.as_str()];
+        run_command("zfs", &arguments);
+    }
+}
+
+pub fn zfs_rename(old_dataset_name: String, new_dataset_name: String) {
+    let arguments = vec!["rename", old_dataset_name.as_str(), new_dataset_name.as_str()];
+    run_command("zfs", &arguments);
+}
+
+pub fn zfs_rollback(selected_elements: Vec<String>) {
+
+    for element in selected_elements {
+
+        let arguments = vec!["rollback", "-rf", element.as_str()];
+        run_command("zfs", &arguments);
+    }
 }
 
 pub fn zfs_send(snapshot_source: String, snapshot_stream: String) -> Result<(),> {
@@ -163,24 +162,36 @@ pub fn zfs_send(snapshot_source: String, snapshot_stream: String) -> Result<(),>
     Ok(())
 }
 
+pub fn zfs_set(dataset: String, property: String, value: String) -> String {
+    let property_value = format!("{}={}", property, value);
+    let arguments = vec!["set", property_value.as_str(), dataset.as_str()];
+    run_command("zfs", &arguments)
+}
+
+pub fn zfs_snapshot(snapshot_name: String) {
+    let arguments = vec!["snapshot", snapshot_name.as_str()];
+    run_command("zfs", &arguments);
+}
+
+
+pub fn zpool_set(dataset: String, property: String, value: String) -> String {
+    let property_value = format!("{}={}", property, value);
+    let arguments = vec!["set", property_value.as_str(), dataset.as_str()];
+    run_command("zpool", &arguments)
+}
+
 pub fn zpool_get_all(dataset: String) -> String {
 
     let arguments = vec!["get", "all", dataset.as_str()];
     run_command("zpool", &arguments)
 }
 
-pub fn zfs_get_all(dataset: String) -> String {
-
-    let arguments = vec!["get", "all", dataset.as_str()];
-    run_command("zfs", &arguments)
-}
-
-pub fn zfs_rollback(selected_elements: Vec<String>) {
+pub fn zpool_scrub(selected_elements: Vec<String>) {
 
     for element in selected_elements {
 
-        let arguments = vec!["rollback", "-rf", element.as_str()];
-        run_command("zfs", &arguments);
+        let arguments = vec!["scrub", element.as_str()];
+        run_command("zpool", &arguments);
     }
 }
 
@@ -189,15 +200,6 @@ pub fn zpool_destroy(selected_elements: Vec<String>) {
     for element in selected_elements {
 
         let arguments = vec!["destroy", element.as_str()];
-        run_command("zpool", &arguments);
-    }
-}
-
-pub fn zpool_scrub(selected_elements: Vec<String>) {
-
-    for element in selected_elements {
-
-        let arguments = vec!["scrub", element.as_str()];
         run_command("zpool", &arguments);
     }
 }
