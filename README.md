@@ -12,8 +12,8 @@ The tool is composed of 2 panes, each showing different ZFS related information.
 and Snapshots at the right pane. By pressing TAB, each window will cycle through the different modes: Pools, Datasets, 
 Volumes and Snapshots.
 
-![ZFS Commander](https://github.com/manoeldesouza/zc/blob/master/screenshots/zc-draft-01.png)
-![ZFS Commander](https://github.com/manoeldesouza/zc/blob/master/screenshots/zc-draft-02.png)
+![ZFS Commander](https://github.com/manoeldesouza/zc/blob/master/screenshots/zc-release-v1.0.0-01.png)
+![ZFS Commander](https://github.com/manoeldesouza/zc/blob/master/screenshots/zc-release-v1.0.0-02.png)
 
 
 ## Installation 
