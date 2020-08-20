@@ -80,6 +80,10 @@ pub fn window(height: i32, width: i32, start_y: i32, start_x: i32, title: &str) 
     win
 }
 
+pub fn delete(win: WINDOW) {
+    delwin(win);
+}
+
 pub fn input_dialog(title: &str, prompt: &str, info: &str) -> Result<String, ()> {
 
     let dialog_height = 8;
@@ -118,8 +122,8 @@ pub fn input_dialog(title: &str, prompt: &str, info: &str) -> Result<String, ()>
         let key = getch();
 
         match key {
-            KEY_ENTER      => { return Ok(input) },
-            KEY_ESC        => { return Err(())   },
+            KEY_ENTER      => { delwin(dialog); return Ok(input) },
+            KEY_ESC        => { delwin(dialog); return Err(())   },
             0x20..=0x7f    => { input.push(char::from_u32(key as u32).unwrap()); },
             KEY_BACKSPACE  => { input.pop(); }
             _              => {},
@@ -188,8 +192,8 @@ pub fn two_input_dialog(title: &str, prompt: &str, info1: &str, info2: &str
         let key = getch();
 
         match key {
-            KEY_ENTER      => { return Ok((input1, input2)) },
-            KEY_ESC        => { return Err(())   },
+            KEY_ENTER      => { delwin(dialog); return Ok((input1, input2)) },
+            KEY_ESC        => { delwin(dialog); return Err(())   },
             0x20..=0x7f    => { 
                 if is_input1_selected {
                     input1.push(char::from_u32(key as u32).unwrap());
@@ -260,11 +264,11 @@ pub fn confirm_dialog(title: &str, prompt: &str, info: &str) -> Result<(),()> {
         let key = getch();
 
         if key == KEY_ENTER {
-            return Ok(())
+            delwin(dialog); return Ok(())
         }
 
         if key == KEY_ESC {
-            return Err(())
+            delwin(dialog); return Err(())
         }
     }
 }
@@ -317,7 +321,7 @@ pub fn result_dialog(title: &str, prompt: &str, info: Vec<&str>) {
         let key = getch();
 
         if key == KEY_ENTER || key == KEY_ESC || key == KEY_F10 {
-            return
+            delwin(dialog); return
         } else if key == KEY_UP {
             start_from -= 1;
         } else if key == KEY_DOWN {
@@ -381,7 +385,7 @@ pub fn navigation_dialog(title: &str, prompt: &str, info: Vec<&str>) -> Result<S
         let key = getch();
 
         if key == KEY_ESC || key == KEY_F10 {
-            return Err(())
+            delwin(dialog); return Err(())
         } else if key == KEY_UP {
             position -= 1;
         } else if key == KEY_DOWN {
@@ -392,7 +396,7 @@ pub fn navigation_dialog(title: &str, prompt: &str, info: Vec<&str>) -> Result<S
             position += 10;
         } else if key == KEY_ENTER {
             let result = info.get(position as usize).unwrap();
-            return Ok(result.to_string());
+            delwin(dialog); return Ok(result.to_string());
 
         }
     }

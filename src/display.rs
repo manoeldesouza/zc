@@ -146,6 +146,9 @@ impl Screen {
         dialog::refresh_screen();
         dialog::refresh(left_pane);
         dialog::refresh(right_pane);
+
+        dialog::delete(left_pane); 
+        dialog::delete(right_pane); 
     }
 
     fn draw_menu(&mut self) {
