@@ -1,2 +1,5 @@
 /target
 /.vscode
+/test/*
+/build/*
+

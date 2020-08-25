@@ -14,6 +14,8 @@ install:
 
 clean:
 	rm -rf target
+	rm -rf test
+	rm -rf build
 
 uninstall:
 	rm /usr/bin/zc
